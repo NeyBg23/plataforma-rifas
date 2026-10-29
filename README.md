@@ -20,6 +20,10 @@ Luego entra en http://localhost:8080.
 - Panel administrativo conceptual y borradores guardados en el navegador.
 - Diseño responsivo para computador y móvil.
 
+## Publicar una vista de demostración con GitHub Pages
+
+En el repositorio, abre **Settings → Pages**, elige **Deploy from a branch**, selecciona la rama **main** y la carpeta **/(root)** y guarda. GitHub publicará la página estática cuando termine el despliegue. Esto no habilita pagos ni implica autorización para operar rifas.
+
 ## Estado del proyecto
 
 **Solo demostración; sin operación comercial.** Los premios, fechas, precios, porcentajes, números y estadísticas son ficticios. No existe conexión a pasarela de pagos, emisión oficial de boletas, asignación transaccional, autenticación real, infraestructura certificada ni autorización vigente para comercializar rifas. Los datos locales no deben utilizarse para operaciones reales.
