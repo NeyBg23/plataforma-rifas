@@ -286,135 +286,213 @@
     `;
   }
 
-  function pageAdmin(){
-    const totalRaffles = raffles.length + drafts.length;
-    return `
-      <section class="admin-page">
-        <div class="shell admin-shell">
-          <aside class="sidebar glass">
-            <strong>Portal administrativo</strong>
-            <a href="#admin" class="${isActive('admin') ? 'active' : ''}">Resumen</a>
-            <a href="#admin/rifas" class="${route()==='admin/rifas' ? 'active' : ''}">Rifas</a>
-            <a href="#admin/nueva" class="${route()==='admin/nueva' ? 'active' : ''}">Nueva rifa</a>
-            <a href="#admin/clientes" class="${route()==='admin/clientes' ? 'active' : ''}">Clientes</a>
-            <a href="#admin/pagos" class="${route()==='admin/pagos' ? 'active' : ''}">Pagos</a>
-          </aside>
+  // Panel de gestión local, sin autenticación ni operaciones comerciales.
+  let adminFilter = 'todos';
+  let adminSearch = '';
+  let editingDraftId = null;
+  const readableDate = date => {
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'Por definir';
+    const d = new Date(`${date}T12:00:00`);
+    return Number.isNaN(d.getTime()) ? 'Por definir' : new Intl.DateTimeFormat('es-CO',{dateStyle:'medium'}).format(d);
+  };
+  const adminCategory = name => categoryLabel(name);
+  const draftStatus = d => d.review === true ? 'En revisión interna' : 'Borrador';
+  const draftStatusClass = d => d.review === true ? 'review' : 'draft';
+  const getDraft = id => drafts.find(d => d.id === id);
+  const adminLink = (href, label, icon, active) => `<a href="#${href}" class="admin-nav-item ${active === href ? 'is-active' : ''}" ${active === href ? 'aria-current="page"' : ''}><span class="nav-symbol" aria-hidden="true">${icon}</span><span>${label}</span></a>`;
 
-          <div class="admin-content">
-            <div class="admin-head glass">
-              <h2>Panel de administración</h2>
-              <p class="muted">Esta sección mantiene el ecosistema completo: experiencia del cliente por fuera, control del negocio por dentro.</p>
-            </div>
-            <div class="stat-grid">
-              <article class="stat-card glass"><small>Rifas visibles</small><strong>${raffles.length}</strong><span class="muted">catálogo demo</span></article>
-              <article class="stat-card glass"><small>Borradores locales</small><strong>${drafts.length}</strong><span class="muted">este navegador</span></article>
-              <article class="stat-card glass"><small>Módulos listos</small><strong>5</strong><span class="muted">frontend conceptual</span></article>
-              <article class="stat-card glass"><small>Ventas reales</small><strong>0</strong><span class="muted">desactivadas</span></article>
-            </div>
-            <div class="table-card glass">
-              <h3>Estado del prototipo</h3>
-              <div class="table-wrap">
-                <table class="data-table">
-                  <thead><tr><th>Módulo</th><th>Estado</th><th>Detalle</th></tr></thead>
-                  <tbody>
-                    <tr><td>Portal cliente final</td><td>Listo</td><td>Catálogo, detalle y selección de números</td></tr>
-                    <tr><td>Estilo visual V3</td><td>Listo</td><td>Minimalista, futurista y glass</td></tr>
-                    <tr><td>Administración</td><td>Demo</td><td>Resumen, rifas, borradores y formularios</td></tr>
-                    <tr><td>Base de datos</td><td>Pendiente</td><td>Se integrará en la siguiente fase</td></tr>
-                    <tr><td>Pagos</td><td>Pendiente</td><td>No hay procesamiento real</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
+  function sidebar(active){
+    return `<aside class="admin-sidebar glass" aria-label="Menú del administrador">
+      <div class="sidebar-top"><span class="side-monogram">✦</span><div><strong>Panel de gestión</strong><small>El toque de la suerte!</small></div></div>
+      <p class="sidebar-section-title">ESPACIO DE TRABAJO</p>
+      <nav class="admin-nav" aria-label="Secciones de gestión">
+        ${adminLink('admin','Inicio del panel','⌂', active)}
+        ${adminLink('admin/rifas','Rifas y borradores','▦', active)}
+        ${adminLink('admin/nueva','Crear una rifa','＋', active)}
+      </nav>
+      <p class="sidebar-section-title">PRÓXIMOS MÓDULOS</p>
+      <nav class="admin-nav" aria-label="Módulos futuros">
+        ${adminLink('admin/clientes','Clientes','♙', active)}
+        ${adminLink('admin/pagos','Pagos y reportes','▤', active)}
+      </nav>
+      <div class="admin-side-note"><span class="signal-dot"></span><strong>Entorno de pruebas</strong><p>Los borradores se guardan únicamente en este dispositivo. No hay ventas habilitadas.</p></div>
+      <a href="#inicio" class="admin-return">↗ Ver el sitio público</a>
+    </aside>`;
+  }
+
+  function adminLayout(content, active, kicker = 'ADMINISTRACIÓN'){
+    return `<section class="admin-page"><div class="shell admin-shell">${sidebar(active)}<div class="admin-content">
+      <div class="admin-topline"><span class="eyebrow-admin"><span class="signal-dot"></span> ${kicker} / DEMO LOCAL</span><a class="admin-quickhelp" href="#admin/ayuda">¿Necesitas ayuda? ↗</a></div>
+      ${content}
+    </div></div></section>`;
+  }
+
+  function pageAdmin(){
+    const latest = drafts.slice(0,4);
+    const reviewCount = drafts.filter(d=>d.review).length;
+    return adminLayout(`
+      <div class="admin-heading"><div><span class="admin-eyebrow">TU ESPACIO DE TRABAJO</span><h1>Todo en un solo lugar<span class="admin-orange">.</span></h1><p>Administra tus próximas rifas sin complicaciones. Empieza creando un borrador y complétalo a tu ritmo.</p></div><a class="btn primary admin-main-cta" href="#admin/nueva"><span aria-hidden="true">＋</span> Crear rifa</a></div>
+      <div class="admin-metrics" aria-label="Resumen de actividad demostrativa">
+        <article class="admin-metric"><span class="metric-symbol">▦</span><small>Rifas de ejemplo</small><strong>${raffles.length}</strong><span>Solo para mostrar el diseño</span></article>
+        <article class="admin-metric"><span class="metric-symbol">✎</span><small>Mis borradores</small><strong>${drafts.length}</strong><span>Guardados en este navegador</span></article>
+        <article class="admin-metric"><span class="metric-symbol">◌</span><small>Por revisar</small><strong>${reviewCount}</strong><span>Revisión interna simulada</span></article>
+        <article class="admin-metric"><span class="metric-symbol">◎</span><small>Ventas reales</small><strong>0</strong><span>Operación no habilitada</span></article>
+      </div>
+      <div class="admin-workgrid">
+        <section class="admin-block admin-welcome"><div class="block-heading"><div><span class="admin-eyebrow">EMPIEZA AQUÍ</span><h2>Prepara tu primera rifa</h2><p>Tres pasos claros. Nunca se publicará una rifa por guardar un borrador.</p></div><span class="large-sparkle" aria-hidden="true">✦</span></div>
+          <div class="admin-steps"><div><span>01</span><strong>Describe el premio</strong><small>Nombre, categoría e imagen</small></div><div><span>02</span><strong>Define los detalles</strong><small>Precio, cantidad y fecha</small></div><div><span>03</span><strong>Guarda y revisa</strong><small>Edita cuando quieras</small></div></div>
+          <a class="btn primary" href="#admin/nueva">Comenzar ahora <span aria-hidden="true">↗</span></a>
+        </section>
+        <section class="admin-block admin-next"><span class="admin-eyebrow">ACCESOS RÁPIDOS</span><h2>¿Qué quieres hacer?</h2>
+          <a class="admin-action-link" href="#admin/rifas"><span class="action-icon">▦</span><span><strong>Ver rifas y borradores</strong><small>Busca, edita y organiza</small></span><span>↗</span></a>
+          <a class="admin-action-link" href="#admin/ayuda"><span class="action-icon">?</span><span><strong>Ver guía rápida</strong><small>Aprende a usar este panel</small></span><span>↗</span></a>
+          <button class="admin-action-link action-button" data-export type="button"><span class="action-icon">↓</span><span><strong>Descargar respaldo</strong><small>Archivo JSON de tus borradores</small></span><span>↗</span></button>
+        </section>
+      </div>
+      <section class="admin-block"><div class="block-heading"><div><span class="admin-eyebrow">ACTIVIDAD RECIENTE</span><h2>Mis borradores</h2></div><a class="admin-text-link" href="#admin/rifas">Ver todos ↗</a></div>
+        ${latest.length ? `<div class="admin-draft-list">${latest.map(d=>`<a href="#admin/editar/${encodeURIComponent(d.id)}" class="draft-row"><span class="draft-art">${categoryGlyph(d.category)}</span><span class="draft-description"><strong>${esc(d.name)}</strong><small>${adminCategory(d.category)} · ${fmt(d.price)} por número</small></span><span class="admin-status ${draftStatusClass(d)}">${draftStatus(d)}</span><span class="draft-arrow">↗</span></a>`).join('')}</div>` : `<div class="admin-empty"><span class="empty-symbol">✧</span><strong>Aún no tienes borradores</strong><p>Crea uno para empezar a organizar tus premios.</p><a class="btn subtle" href="#admin/nueva">Crear mi primer borrador ↗</a></div>`}
       </section>
-    `;
+      <p class="admin-disclaimer">Este panel es una demostración pública sin inicio de sesión. No registres datos personales, contraseñas ni información financiera real.</p>
+    `, 'admin', 'VISTA GENERAL');
+  }
+
+  function categoryGlyph(cat){return ({moto:'🏍',auto:'🚗',tecnologia:'⌘'})[cat] || '✦';}
+  function adminFilteredRows(){
+    return [
+      ...drafts.map(d=>({...d,_source:'draft'})),
+      ...raffles.map(r=>({...r,_source:'example'}))
+    ].filter(r=>{
+      if(adminFilter === 'borradores' && r._source !== 'draft')return false;
+      if(adminFilter === 'ejemplos' && r._source !== 'example')return false;
+      if(adminFilter === 'revision' && !(r._source === 'draft' && r.review))return false;
+      const query = adminSearch.trim().toLocaleLowerCase('es-CO');
+      return !query || `${r.name} ${adminCategory(r.category)}`.toLocaleLowerCase('es-CO').includes(query);
+    });
+  }
+
+  function adminRaffleRows(){
+    const rows = adminFilteredRows();
+    return rows.length ? rows.map(r=>{
+      const draft = r._source === 'draft';
+      return `<tr><td><div class="admin-table-name"><span class="draft-art sm">${categoryGlyph(r.category)}</span><div><strong>${esc(r.name)}</strong><small>${esc(adminCategory(r.category))}</small></div></div></td>
+        <td>${fmt(r.price)}</td><td>${intFmt(r.total)}</td><td><span class="admin-status ${draft ? draftStatusClass(r) : 'example'}">${draft ? draftStatus(r) : 'Ejemplo de catálogo'}</span></td>
+        <td><div class="admin-table-actions">${draft ? `<a class="mini-action" href="#admin/editar/${encodeURIComponent(r.id)}" title="Editar borrador">Editar ↗</a><button type="button" class="mini-action" data-review="${esc(r.id)}">${r.review ? 'Volver a borrador' : 'Revisar'}</button><button type="button" class="mini-action danger" data-remove="${esc(r.id)}">Eliminar</button>` : `<a class="mini-action" href="#detalle/${encodeURIComponent(r.id)}">Ver ↗</a><button type="button" class="mini-action" data-copy-example="${esc(r.id)}">Usar como ejemplo</button>`}</div></td></tr>`;
+    }).join('') : `<tr><td colspan="5" class="admin-table-empty">No hay resultados con esos filtros. <button class="admin-text-link" data-clear-filters type="button">Limpiar búsqueda</button></td></tr>`;
   }
 
   function pageAdminRaffles(){
-    const rows = [...drafts.map(d => ({...d, status:'Borrador local'})), ...raffles.map(r => ({...r, status:'Visible demo'}))];
-    return `
-      <section class="admin-page">
-        <div class="shell admin-shell">
-          ${sidebar('admin/rifas')}
-          <div class="admin-content">
-            <div class="admin-head glass"><h2>Rifas y premios</h2><p class="muted">Listado de rifas visibles en la demo y borradores guardados localmente.</p></div>
-            <div class="table-card glass">
-              <div class="table-wrap">
-                <table class="data-table">
-                  <thead><tr><th>Nombre</th><th>Precio</th><th>Cantidad</th><th>Estado</th><th>Acción</th></tr></thead>
-                  <tbody>
-                    ${rows.map(r=>`<tr><td><strong>${esc(r.name)}</strong><br><span class="muted">${categoryLabel(r.category)}</span></td><td>${fmt(r.price)}</td><td>${intFmt(r.total)}</td><td>${esc(r.status)}</td><td>${String(r.id).startsWith('draft-') ? `<button class="btn subtle" data-remove="${r.id}">Eliminar</button>` : `<a class="simple-link" href="#detalle/${r.id}">Ver</a>`}</td></tr>`).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
+    return adminLayout(`
+      <div class="admin-heading"><div><span class="admin-eyebrow">ORGANIZA TUS IDEAS</span><h1>Rifas y premios<span class="admin-orange">.</span></h1><p>Encuentra rápidamente una rifa, edita tus borradores o toma un ejemplo para comenzar.</p></div><a class="btn primary admin-main-cta" href="#admin/nueva">＋ Nueva rifa</a></div>
+      <section class="admin-block admin-list-block">
+        <div class="admin-list-head"><div><h2>Todas las rifas</h2><p>${drafts.length} borradores locales y ${raffles.length} ejemplos visuales</p></div><button class="admin-text-link" data-export type="button">↓ Descargar respaldo</button></div>
+        <div class="admin-toolbar"><label class="admin-search"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar rifas por nombre o categoría</span><input id="admin-search" autocomplete="off" type="search" value="${esc(adminSearch)}" placeholder="Buscar por nombre o categoría..." /></label>
+          <label class="admin-select-label"><span class="sr-only">Filtrar rifas</span><select id="admin-filter"><option value="todos" ${adminFilter==='todos'?'selected':''}>Todas las rifas</option><option value="borradores" ${adminFilter==='borradores'?'selected':''}>Solo borradores</option><option value="revision" ${adminFilter==='revision'?'selected':''}>En revisión</option><option value="ejemplos" ${adminFilter==='ejemplos'?'selected':''}>Ejemplos visuales</option></select></label></div>
+        <div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Premio</th><th>Precio / número</th><th>Números</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="admin-table-body">${adminRaffleRows()}</tbody></table></div>
       </section>
-    `;
+      <div class="admin-tip"><span>ⓘ</span><p><strong>Importante:</strong> los borradores son privados solo dentro de este navegador, no por una cuenta protegida. No se muestran al público ni pueden recibir pagos. El estado «En revisión» no constituye aprobación regulatoria.</p></div>
+      <dialog class="admin-dialog" id="delete-dialog"><div><span class="dialog-symbol">!</span><h2>¿Eliminar este borrador?</h2><p>Esta acción lo quitará de este navegador. Puedes descargar un respaldo antes de eliminarlo.</p><div class="dialog-actions"><button class="btn subtle" type="button" data-cancel-delete>Cancelar</button><button class="btn primary" type="button" id="confirm-delete">Sí, eliminar</button></div></div></dialog>
+    `,'admin/rifas','ORGANIZACIÓN');
   }
 
-  function pageAdminNew(){
-    return `
-      <section class="admin-page">
-        <div class="shell admin-shell">
-          ${sidebar('admin/nueva')}
-          <div class="admin-content">
-            <div class="admin-head glass"><h2>Crear borrador</h2><p class="muted">Este formulario permite construir nuevas campañas de manera local mientras definimos la estructura real del sistema.</p></div>
-            <div class="form-card glass">
-              <form id="draft-form">
-                <div class="form-grid">
-                  <div class="field full"><label>Nombre de la rifa</label><input name="name" required placeholder="Ej. BMW G 310 R Edición Especial"></div>
-                  <div class="field"><label>Categoría</label><select name="category"><option value="moto">Moto</option><option value="auto">Vehículo</option><option value="tecnologia">Tecnología</option></select></div>
-                  <div class="field"><label>Fecha del sorteo</label><input type="date" name="draw"></div>
-                  <div class="field"><label>Precio por número</label><input type="number" name="price" required placeholder="25000"></div>
-                  <div class="field"><label>Cantidad de números</label><input type="number" name="total" required placeholder="10000"></div>
-                  <div class="field full"><label>Descripción</label><textarea name="desc" required placeholder="Describe el premio y la experiencia para el usuario final..."></textarea></div>
-                </div>
-                <div class="form-actions">
-                  <a href="#admin/rifas" class="btn subtle">Cancelar</a>
-                  <button class="btn primary" type="submit">Guardar borrador</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+  function pageAdminNew(id){
+    const draft = id ? getDraft(id) : null;
+    if (id && !draft) return adminLayout(`<div class="admin-block"><h2>No encontramos ese borrador</h2><p>Es posible que se haya eliminado o esté en otro dispositivo.</p><a href="#admin/rifas" class="btn subtle">Volver a rifas</a></div>`, 'admin/rifas');
+    editingDraftId = draft?.id || null;
+    const cat = draft?.category || 'moto';
+    const fieldVal = (v) => esc(v ?? '');
+    return adminLayout(`
+      <div class="admin-heading"><div><span class="admin-eyebrow">${draft?'EDITAR RIFA':'NUEVA RIFA'} · GUÍA EN TRES PASOS</span><h1>${draft?'Edita tu borrador':'Crea una nueva rifa'}<span class="admin-orange">.</span></h1><p>Solo tienes que completar lo esencial. Podrás modificarlo después, antes de cualquier publicación.</p></div><a href="#admin/rifas" class="admin-text-link">← Volver a rifas</a></div>
+      <section class="admin-block admin-wizard">
+        <div class="wizard-progress" aria-label="Progreso del formulario"><div class="wizard-progress-item active" data-progress="1"><span>1</span><div><strong>El premio</strong><small>¿Qué se va a rifar?</small></div></div><div class="wizard-progress-connector"></div><div class="wizard-progress-item" data-progress="2"><span>2</span><div><strong>Los detalles</strong><small>Precio y números</small></div></div><div class="wizard-progress-connector"></div><div class="wizard-progress-item" data-progress="3"><span>3</span><div><strong>Revisar y guardar</strong><small>Todo en orden</small></div></div></div>
+        <form id="draft-form" novalidate data-edit-id="${draft?esc(draft.id):''}">
+          <div class="wizard-step" data-step="1"><h2>Cuéntanos sobre el premio</h2><p class="wizard-step-desc">Comienza con un nombre llamativo y una descripción que entienda cualquier cliente.</p>
+            <div class="form-grid admin-form-grid">
+              <div class="field full"><label for="admin-name">Nombre de la rifa <span class="required">*</span></label><input id="admin-name" name="name" minlength="3" maxlength="85" required value="${fieldVal(draft?.name)}" placeholder="Ej. Motocicleta edición especial"/><small>Usa un nombre corto que describa el premio.</small></div>
+              <div class="field full"><label for="admin-category">Categoría del premio <span class="required">*</span></label><select id="admin-category" name="category" required><option value="moto" ${cat==='moto'?'selected':''}>Motocicleta</option><option value="auto" ${cat==='auto'?'selected':''}>Automóvil</option><option value="tecnologia" ${cat==='tecnologia'?'selected':''}>Tecnología</option></select></div>
+              <div class="field full"><label for="admin-desc">Descripción <span class="required">*</span></label><textarea id="admin-desc" name="desc" minlength="10" maxlength="700" required placeholder="¿Qué incluye, qué lo hace especial y cuáles son sus características principales?">${fieldVal(draft?.desc)}</textarea><small>Evita promesas que todavía no se puedan verificar.</small></div>
+            </div></div>
+          <div class="wizard-step is-hidden" data-step="2"><h2>Define los detalles</h2><p class="wizard-step-desc">Estos valores son ilustrativos y todavía no permiten comercializar números.</p>
+            <div class="form-grid admin-form-grid">
+              <div class="field"><label for="admin-price">Precio por número (COP) <span class="required">*</span></label><input id="admin-price" name="price" type="number" min="1" max="1000000000" step="1" required value="${draft?.price || ''}" placeholder="25000"/><small>Ejemplo: 25000</small></div>
+              <div class="field"><label for="admin-total">Cantidad de números <span class="required">*</span></label><input id="admin-total" name="total" type="number" min="10" max="1000000" step="1" required value="${draft?.total || ''}" placeholder="10000"/><small>Entre 10 y 1.000.000, en esta demo.</small></div>
+              <div class="field"><label for="admin-draw">Fecha tentativa del sorteo</label><input id="admin-draw" name="draw" type="date" value="${fieldVal(draft?.draw)}"/><small>La fecha puede cambiar antes de autorizar la rifa.</small></div>
+              <div class="field"><label for="admin-time">Hora tentativa</label><input id="admin-time" name="time" type="time" value="${fieldVal(draft?.time)}"/><small>Hora de Colombia</small></div>
+            </div></div>
+          <div class="wizard-step is-hidden" data-step="3"><h2>Revisa antes de guardar</h2><p class="wizard-step-desc">Verifica los datos y guarda tu trabajo. Esta acción no publica la rifa ni recibe dinero.</p><div class="review-preview" id="review-preview" aria-live="polite"></div><div class="admin-tip"><span>ⓘ</span><p>Quedará como borrador en este navegador. Más adelante integraremos usuarios, almacenamiento central y autorización de publicación.</p></div></div>
+          <div class="wizard-footer"><span id="wizard-indicator">Paso 1 de 3</span><div class="wizard-buttons"><button class="btn subtle is-hidden" id="wizard-back" type="button">← Atrás</button><button class="btn primary" id="wizard-next" type="button">Siguiente →</button><button class="btn primary is-hidden" id="wizard-save" type="submit">${draft?'Guardar cambios':'Guardar borrador'} ✓</button></div></div>
+        </form>
       </section>
-    `;
-  }
-
-  function sidebar(active){
-    return `
-      <aside class="sidebar glass">
-        <strong>Portal administrativo</strong>
-        <a href="#admin" class="${active==='admin' ? 'active' : ''}">Resumen</a>
-        <a href="#admin/rifas" class="${active==='admin/rifas' ? 'active' : ''}">Rifas</a>
-        <a href="#admin/nueva" class="${active==='admin/nueva' ? 'active' : ''}">Nueva rifa</a>
-        <a href="#admin/clientes" class="${active==='admin/clientes' ? 'active' : ''}">Clientes</a>
-        <a href="#admin/pagos" class="${active==='admin/pagos' ? 'active' : ''}">Pagos</a>
-      </aside>
-    `;
+      <div class="admin-tip"><span>✓</span><p>Tu trabajo se conserva en este dispositivo cuando presionas «Guardar borrador». Antes de cambiar de equipo, descarga una copia desde la sección de rifas.</p></div>
+    `,draft?'admin/rifas':'admin/nueva','FORMULARIO GUIADO');
   }
 
   function pagePlaceholder(kind){
-    const map = kind === 'clientes'
-      ? ['Clientes','Aquí irá el historial de participantes, compras, datos y seguimiento de soporte.']
-      : ['Pagos','Aquí irá la conciliación, estados de transacciones y reportes de recaudo.'];
-    return `
-      <section class="admin-page">
-        <div class="shell admin-shell">
-          ${sidebar(`admin/${kind}`)}
-          <div class="admin-content">
-            <div class="empty-state glass">
-              <h2>${map[0]}</h2>
-              <p>${map[1]}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    `;
+    const isClient=kind==='clientes';
+    return adminLayout(`
+      <div class="admin-heading"><div><span class="admin-eyebrow">PRÓXIMAMENTE</span><h1>${isClient?'Clientes':'Pagos y reportes'}<span class="admin-orange">.</span></h1><p>${isClient?'Aquí podrás encontrar usuarios y consultar su participación de forma segura.':'Aquí podrás consultar transacciones, conciliaciones y reportes financieros.'}</p></div></div>
+      <div class="admin-metrics placeholder-metrics"><article class="admin-metric"><small>${isClient?'Clientes registrados':'Transacciones reales'}</small><strong>0</strong><span>Sin base de datos aún</span></article><article class="admin-metric"><small>${isClient?'Perfiles verificados':'Total recaudado'}</small><strong>${isClient?'0':fmt(0)}</strong><span>No se reciben operaciones reales</span></article></div>
+      <div class="admin-block admin-unavailable"><span>⌁</span><h2>${isClient?'La gestión de clientes será privada':'La pasarela estará desactivada por ahora'}</h2><p>${isClient?'Este prototipo público nunca debe contener nombres, cédulas o datos de participantes reales. Habilitaremos este módulo cuando existan autenticación, permisos y una base de datos protegida.':'Integrar pagos requiere validación del operador, control de inventario transaccional, conciliación y autorizaciones aplicables. No mostraremos ingresos ficticios como operaciones reales.'}</p><a class="btn subtle" href="#admin">Volver al panel ↗</a></div>
+    `,`admin/${kind}`,'MÓDULO EN PREPARACIÓN');
+  }
+
+  function pageAdminHelp(){
+    return adminLayout(`
+      <div class="admin-heading"><div><span class="admin-eyebrow">GUÍA RÁPIDA</span><h1>Fácil desde el primer clic<span class="admin-orange">.</span></h1><p>Así puedes usar esta versión sin conocimientos técnicos.</p></div></div>
+      <div class="help-grid">
+        <article class="admin-block"><span class="help-icon">01</span><h2>Crear un borrador</h2><p>Entra en «Crear una rifa», describe el premio, indica los números y guarda. Puedes regresar a editarlo cuando quieras.</p><a class="admin-text-link" href="#admin/nueva">Crear rifa ↗</a></article>
+        <article class="admin-block"><span class="help-icon">02</span><h2>Editar o revisar</h2><p>En «Rifas y borradores» busca tu rifa y pulsa «Editar». «Revisar» solo indica un estado interno de trabajo.</p><a class="admin-text-link" href="#admin/rifas">Abrir mis rifas ↗</a></article>
+        <article class="admin-block"><span class="help-icon">03</span><h2>Guardar una copia</h2><p>Pulsa «Descargar respaldo» para obtener un archivo JSON que podrás conservar como copia local de tus borradores.</p><button type="button" class="admin-text-link" data-export>Descargar respaldo ↗</button></article>
+        <article class="admin-block"><span class="help-icon">04</span><h2>Publicar en el futuro</h2><p>La publicación de rifas y la compra de números permanecen bloqueadas hasta implementar permisos, backend seguro y requisitos regulatorios.</p><a class="admin-text-link" href="#inicio">Ver el catálogo demo ↗</a></article>
+      </div>
+      <p class="admin-disclaimer">Aviso: este panel es público y únicamente de demostración. El almacenamiento local no es una base de datos compartida ni un sistema de autenticación.</p>
+    `,'admin/ayuda','AYUDA');
+  }
+
+  let wizardStep = 1;
+  function updateWizard(step){
+    wizardStep = Math.max(1,Math.min(3,step));
+    document.querySelectorAll('.wizard-step').forEach(n=>n.classList.toggle('is-hidden',Number(n.dataset.step)!==wizardStep));
+    document.querySelectorAll('[data-progress]').forEach(n=>{
+      const s=Number(n.dataset.progress);
+      n.classList.toggle('active',s===wizardStep);
+      n.classList.toggle('completed',s<wizardStep);
+    });
+    const back=document.getElementById('wizard-back'), next=document.getElementById('wizard-next'), save=document.getElementById('wizard-save');
+    if(back)back.classList.toggle('is-hidden',wizardStep===1);
+    if(next)next.classList.toggle('is-hidden',wizardStep===3);
+    if(save)save.classList.toggle('is-hidden',wizardStep!==3);
+    const indicator=document.getElementById('wizard-indicator');
+    if(indicator)indicator.textContent=`Paso ${wizardStep} de 3`;
+    if(wizardStep===3)updateReviewPreview();
+  }
+  function validateCurrentStep(){
+    const panel=document.querySelector(`.wizard-step[data-step="${wizardStep}"]`);
+    if(!panel)return false;
+    for(const input of panel.querySelectorAll('input,textarea,select')){
+      if(!input.checkValidity()){input.reportValidity();input.focus();return false;}
+      if(input.required && !input.value.trim()){input.focus();return false;}
+    }
+    return true;
+  }
+  function updateReviewPreview(){
+    const form=document.getElementById('draft-form');
+    const target=document.getElementById('review-preview');
+    if(!form||!target)return;
+    const f=new FormData(form);
+    const vals=[
+      ['Nombre',f.get('name') || 'Por definir'],['Categoría',adminCategory(f.get('category'))],
+      ['Precio / número',fmt(Number(f.get('price'))||0)],['Número de boletas',intFmt(Number(f.get('total'))||0)],
+      ['Fecha',readableDate(f.get('draw'))],['Hora',f.get('time') || 'Por definir']
+    ];
+    target.innerHTML=vals.map(([label,value])=>`<div><small>${label}</small><strong>${esc(value)}</strong></div>`).join('') + `<div class="review-description"><small>Descripción</small><p>${esc(f.get('desc')||'')}</p></div>`;
+  }
+
+  function exportDrafts(){
+    const payload={project:'El toque de la suerte!',version:1,exportedAt:new Date().toISOString(),drafts:drafts.map(d=>({id:d.id,name:d.name,desc:d.desc,category:d.category,price:d.price,total:d.total,draw:d.draw||'',time:d.time||'',review:!!d.review}))};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');link.href=url;link.download='el-toque-de-la-suerte-borradores.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast(`Respaldo descargado (${drafts.length} borradores)`);
   }
 
   function render(){
@@ -425,12 +503,18 @@
     else if(r.startsWith('detalle/')) html = pageDetail(r.replace('detalle/',''));
     else if(r === 'admin') html = pageAdmin();
     else if(r === 'admin/rifas') html = pageAdminRaffles();
-    else if(r === 'admin/nueva') html = pageAdminNew();
+    else if(r === 'admin/nueva') {editingDraftId=null;html = pageAdminNew();}
+    else if(r.startsWith('admin/editar/')) html = pageAdminNew(decodeURIComponent(r.slice('admin/editar/'.length)));
+    else if(r === 'admin/ayuda') html = pageAdminHelp();
     else if(r === 'admin/clientes') html = pagePlaceholder('clientes');
     else if(r === 'admin/pagos') html = pagePlaceholder('pagos');
     else if(r === 'como-funciona' || r === 'confianza') html = pageHome();
     else html = pageHome();
     app.innerHTML = html;
+    nav.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded','false');
+    if(r === 'admin/nueva' || r.startsWith('admin/editar/')) {wizardStep=1;updateWizard(1);}
+    document.title = `${r.startsWith('admin') ? 'Administración | ' : ''}El toque de la suerte!`;
     requestAnimationFrame(() => {
       if(r === 'como-funciona' || r === 'confianza' || r === 'rifas') {
         const sectionId = r === 'rifas' ? 'rifas' : r;
@@ -464,12 +548,35 @@
       return;
     }
 
-    const remove = e.target.closest('[data-remove]');
+    if(e.target.closest('[data-export]')){ exportDrafts();return; }
+    if(e.target.closest('[data-clear-filters]')){ adminFilter='todos';adminSearch='';render();return; }
+    const copy=e.target.closest('[data-copy-example]');
+    if(copy){
+      const seed=raffles.find(x=>x.id===copy.dataset.copyExample);
+      if(seed){
+        const id=`draft-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`;
+        drafts.unshift({id,name:`${seed.name} (borrador)`,desc:seed.desc,category:seed.category,price:seed.price,total:seed.total,draw:'',time:'',review:false});
+        if(save(draftKey,drafts)){go(`admin/editar/${encodeURIComponent(id)}`);toast('Ejemplo copiado a tus borradores');}
+      }
+      return;
+    }
+    const review=e.target.closest('[data-review]');
+    if(review){const item=getDraft(review.dataset.review);if(item){item.review=!item.review;save(draftKey,drafts);render();toast(item.review?'Marcado para revisión interna':'Devuelto a borrador');}return;}
+    const remove=e.target.closest('[data-remove]');
     if(remove){
-      drafts = drafts.filter(x => x.id !== remove.dataset.remove);
-      save(draftKey, drafts);
-      render();
-      toast('Borrador eliminado');
+      const dialog=document.getElementById('delete-dialog');
+      if(dialog){dialog.dataset.target=remove.dataset.remove;if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');}
+      return;
+    }
+    if(e.target.closest('[data-cancel-delete]')){document.getElementById('delete-dialog')?.close();return;}
+    if(e.target.closest('#confirm-delete')){
+      const dialog=document.getElementById('delete-dialog');
+      const id=dialog?.dataset.target;
+      if(id){drafts=drafts.filter(x=>x.id!==id);save(draftKey,drafts);render();toast('Borrador eliminado');}return;
+    }
+    if(e.target.closest('#wizard-back')){updateWizard(wizardStep-1);return;}
+    if(e.target.closest('#wizard-next')){
+      if(validateCurrentStep()){updateWizard(wizardStep+1);document.querySelector('.admin-wizard')?.scrollIntoView({behavior:'smooth',block:'start'});}
       return;
     }
 
@@ -493,18 +600,45 @@
   document.addEventListener('submit', (e) => {
     if(e.target.id !== 'draft-form') return;
     e.preventDefault();
-    const fd = new FormData(e.target);
+    const form=e.target;
+    if(wizardStep !== 3){toast('Completa los tres pasos para guardar');return;}
+    const fd = new FormData(form);
     const name = String(fd.get('name') || '').trim();
     const desc = String(fd.get('desc') || '').trim();
     const category = String(fd.get('category') || 'moto');
     const price = Number(fd.get('price') || 0);
     const total = Number(fd.get('total') || 0);
     const draw = String(fd.get('draw') || '');
-    if(name.length < 3 || desc.length < 10 || !Number.isSafeInteger(price) || price <= 0 || !Number.isSafeInteger(total) || total < 10 || total > 1000000) return toast('Completa correctamente el formulario');
-    drafts.unshift({ id:`draft-${Date.now().toString(36)}`, name, desc, category, price, total, draw });
-    save(draftKey, drafts);
-    go('admin/rifas');
-    toast('Borrador guardado');
+    const time = String(fd.get('time') || '');
+    if(name.length < 3 || name.length > 85 || desc.length < 10 || desc.length > 700 ||
+      !['moto','auto','tecnologia'].includes(category) || !Number.isSafeInteger(price) || price < 1 || price > 1000000000 ||
+      !Number.isSafeInteger(total) || total < 10 || total > 1000000 ||
+      (draw && !/^\d{4}-\d{2}-\d{2}$/.test(draw)) || (time && !/^\d{2}:\d{2}$/.test(time))){
+      toast('Revisa los datos del borrador');return;
+    }
+    const id=form.dataset.editId;
+    const existing=id ? getDraft(id) : null;
+    if(id && !existing){toast('El borrador ya no existe en este navegador');return;}
+    const entry={id:existing?.id || `draft-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`,
+      name,desc,category,price,total,draw,time,review:existing?.review||false};
+    if(existing){Object.assign(existing,entry);}
+    else drafts.unshift(entry);
+    if(save(draftKey,drafts)){go('admin/rifas');if(route()==='admin/rifas')render();toast(existing?'Cambios guardados en este navegador':'Borrador creado correctamente');}
+  });
+
+  document.addEventListener('input',e=>{
+    if(e.target.id==='admin-search'){
+      adminSearch=e.target.value;
+      const body=document.getElementById('admin-table-body');
+      if(body)body.innerHTML=adminRaffleRows();
+    }
+  });
+  document.addEventListener('change',e=>{
+    if(e.target.id==='admin-filter'){
+      adminFilter=e.target.value;
+      const body=document.getElementById('admin-table-body');
+      if(body)body.innerHTML=adminRaffleRows();
+    }
   });
 
   menuBtn.addEventListener('click', () => {
