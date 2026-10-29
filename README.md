@@ -20,9 +20,21 @@ Luego entra en http://localhost:8080.
 - Panel administrativo conceptual y borradores guardados en el navegador.
 - Diseño responsivo para computador y móvil.
 
-## Publicar una vista de demostración con GitHub Pages
 
-En el repositorio, abre **Settings → Pages**, elige **Deploy from a branch**, selecciona la rama **main** y la carpeta **/(root)** y guarda. GitHub publicará la página estática cuando termine el despliegue. Esto no habilita pagos ni implica autorización para operar rifas.
+## Panel administrativo intuitivo — V5
+
+Abre `#admin` para entrar al panel demostrativo. En el panel encontrarás:
+
+- **Resumen comprensible:** cantidad de rifas ilustrativas, borradores, revisiones internas y ventas reales (siempre 0 en esta demo).
+- **Creación guiada en tres pasos:** premio → cantidad y precio → revisión y guardado.
+- **Listado de rifas:** búsqueda por nombre y categoría, filtros para borradores, ejemplos y revisión interna.
+- **Edición y eliminación con confirmación**, copia de rifas de ejemplo a borradores.
+- **Copia de seguridad JSON** descargable para conservar los borradores del navegador.
+- **Guía rápida** en `#admin/ayuda`, con instrucciones sin lenguaje técnico.
+
+**Importante:** cualquier persona que visite la página puede abrir esta demo del panel, pero los borradores se conservan solo en el navegador local de quien los creó. **No existe control de acceso, autenticación, base de datos de producción, clientes reales ni pagos.** No debe usarse para operar rifas ni almacenar información sensible. La etiqueta «En revisión interna» no representa aprobación gubernamental ni comercial.
+
+El próximo desarrollo real necesita backend, autenticación autorizada por roles, almacenamiento y permisos seguros; una reserva de números jamás debe depender del navegador.
 
 ## Estado del proyecto
 
