@@ -1,6 +1,6 @@
 # El toque de la suerte! ✦
 
-**Prototipo web V4** de una plataforma colombiana de rifas, con estética **negra y naranja neón**, diseñada para la experiencia del cliente final y un futuro panel administrativo.
+**Prototipo web V5 (panel administrativo)** de una plataforma colombiana de rifas, con estética **negra y naranja neón**, diseñada para la experiencia del cliente final y un futuro panel administrativo.
 
 ## Demo
 
