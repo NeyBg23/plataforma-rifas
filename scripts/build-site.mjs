@@ -19,6 +19,7 @@ const allowed = [
   'experiencia/app.mjs',
   'experiencia/catalog.mjs',
   'experiencia/demo-domain.mjs',
+  'experiencia/payment-gate.mjs',
   'experiencia/assets/premio-1.svg',
   'experiencia/assets/premio-2.svg',
   'experiencia/assets/premio-3.svg',
