@@ -83,3 +83,7 @@ En Supabase, el esquema privado `ets_order_lab` incluye pedidos de laboratorio, 
 - [Migración privada de laboratorio](database/07_v11_private_orders_lab.sql)
 - [Pruebas de lógica](tests/v11_domain.test.mjs)
 - [Prueba SQL reversible](tests/v11_sql_reversible.sql)
+
+## V12.1 — despliegues automáticos
+
+Cambio de integración para verificar el flujo GitHub → Vercel. El proyecto sigue siendo de desarrollo, sin pagos ni emisión comercial. El frontend de V12.1 mostrará únicamente datos autorizados por Supabase Auth y RLS.
