@@ -4,7 +4,7 @@
   "private": true,
   "description": "Sitio web de desarrollo de El toque de la suerte! — sin ventas.",
   "scripts": {
-    "build": "node scripts/build-site.mjs",
+    "build": "npm test && node scripts/build-site.mjs",
     "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs"
   },
   "engines": {
