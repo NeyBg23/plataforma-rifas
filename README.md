@@ -60,3 +60,14 @@ Test de V9 (requiere Playwright y Chromium instalados): `python tests/test_numbe
 - [Inventario en consulta V9](docs/V9_CONTROL_NUMEROS.md)
 
 La puesta en operación comercial requiere un sistema transaccional validado, controles de datos personales, infraestructura apropiada, pruebas de concurrencia y evaluación legal y técnica de las autorizaciones exigibles.
+
+## V10 — motor transaccional (laboratorio cerrado)
+
+Se aplicó un **laboratorio PostgreSQL privado**, en el esquema `ets_lab`, para probar retenciones atómicas, conflictos entre solicitudes simultáneas, idempotencia, liberación y trazabilidad. Se probaron cuatro solicitudes simultáneas: **1 aceptada, 3 conflictos**, con un único titular. Los datos temporales fueron limpiados.
+
+**No es funcionalidad de venta ni reserva pública.** No cambia el inventario V9 ni habilita números, pagos o boletas. La página pública y el administrador no llaman funciones del laboratorio.
+
+- [Diseño, pruebas y límites de V10](docs/V10_MOTOR_TRANSACCIONAL_LAB.md)
+- [Migración SQL V10](database/05_v10_atomic_lab.sql)
+- [Refuerzo de idempotencia](database/06_v10_idempotency_guard.sql)
+- [Prueba SQL reversible](tests/v10_sql_checks.sql)
