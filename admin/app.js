@@ -1,4 +1,4 @@
-/* El toque de la suerte! · V7 · Acceso exclusivo por Supabase Auth + RLS.
+/* El toque de la suerte! · V8 · Acceso exclusivo por Supabase Auth + RLS.
  * El código público NO confiere permisos. La base de datos decide cada operación.
  * No se habilitan ventas, reservas, emisión de boletas ni aprobación de rifas.
  */
@@ -6,9 +6,9 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const config = window.ETS_PUBLIC_SUPABASE || {};
-  const state = { client:null, user:null, staff:null, raffles:[], audit:[], view:'overview', step:1, editing:null, busy:false };
+  const state = { client:null, user:null, staff:null, raffles:[], audit:[], view:'overview', step:1, editing:null, busy:false, selectedRaffle:null, prize:null, photos:[], prizeBusy:false };
   const tableBody = $('rafflesRows');
-  const forms = { login:$('loginForm'), raffle:$('raffleForm') };
+  const forms = { login:$('loginForm'), raffle:$('raffleForm'), prize:$('prizeForm'), photo:$('photoForm') };
   const themeKey='el-toque-v6-tema';
   let noticeTimeout;
 
@@ -113,29 +113,56 @@
       tr.append(el('td',{},money(r.ticket_price_cop)),el('td',{},integer(r.total_numbers)));
       const statusCell=el('td');statusCell.append(el('span',{class:'pill'},labels[r.state]||r.state));tr.append(statusCell);
       const actions=el('td');
-      if(canWrite()&&['draft','in_review','awaiting_authorization'].includes(r.state)){
-        const edit=el('button',{type:'button',class:'mini',dataset:{edit:r.id}},'Editar');actions.append(edit);
-        if(r.state==='draft')actions.append(el('button',{type:'button',class:'mini',dataset:{review:r.id}},'Revisar'));
-      }else actions.textContent='Solo lectura';
+      actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
+      if(canWrite()&&r.state==='draft'){
+        actions.append(el('button',{type:'button',class:'mini',dataset:{edit:r.id}},'Editar'));
+        actions.append(el('button',{type:'button',class:'mini',dataset:{review:r.id}},'Revisar'));
+      }
       tr.append(actions);tableBody.append(tr);
     }
   }
   function renderAudit(){
     const parent=$('auditRows');parent.replaceChildren();
     if(!state.audit.length){parent.append(el('p',{},'No hay cambios registrados todavía.'));return;}
+    const eventNames={INSERT:'Rifa creada',UPDATE:'Rifa actualizada',DELETE:'Rifa eliminada',PRIZE_INSERT:'Ficha de premio creada',PRIZE_UPDATE:'Ficha de premio actualizada',PHOTO_INSERT:'Fotografía añadida',PHOTO_UPDATE:'Fotografía modificada',PHOTO_DELETE:'Fotografía retirada'};
+    const keyNames={title:'Nombre',description:'Descripción',category:'Categoría',ticket_price_cop:'Precio por número',total_numbers:'Cantidad de números',draw_at:'Fecha tentativa',state:'Estado',brand:'Marca',model:'Modelo',prize_condition:'Condición',prize_details:'Características',estimated_value_cop:'Valor estimado',includes_text:'Incluye',delivery_notes:'Entrega',alt_text:'Texto de fotografía',is_cover:'Foto principal',sort_order:'Orden'};
+    const formatDiff=(key,value)=>{
+      if(value===null||value===undefined||value==='')return 'Sin especificar';
+      if(key==='ticket_price_cop'||key==='estimated_value_cop')return money(Number(value));
+      if(key==='draw_at')return dateFormat(value);
+      if(key==='is_cover')return value?'Sí':'No';
+      if(key==='state')return labels[value]||value;
+      if(key==='prize_condition')return ({new:'Nuevo',used:'Usado',other:'Otro'})[value]||value;
+      return String(value);
+    };
     for(const item of state.audit){
       const box=el('article',{class:'event'});
-      box.append(el('strong',{},item.operation==='INSERT'?'Rifa creada':item.operation==='UPDATE'?'Rifa actualizada':'Operación registrada'));
-      box.append(el('p',{},item.new_data?.title||item.old_data?.title||'Rifa'));
-      box.append(el('div',{class:'time'},dateFormat(item.created_at)));
+      box.append(el('strong',{},eventNames[item.operation]||'Cambio registrado'));
+      const associated=state.raffles.find(x=>x.id===item.raffle_id);
+      box.append(el('p',{},associated?.title||item.new_data?.title||item.old_data?.title||'Premio'));
+      const metadata=el('div',{class:'time'},dateFormat(item.created_at));
+      if(item.actor_id)metadata.append(el('span',{},' · Usuario '+String(item.actor_id).slice(0,8)+'…'));
+      box.append(metadata);
+      const old=item.old_data||{},current=item.new_data||{};
+      const keys=Object.keys(keyNames).filter(key=>Object.prototype.hasOwnProperty.call(current,key)||Object.prototype.hasOwnProperty.call(old,key));
+      const changed=keys.filter(key=>JSON.stringify(old[key]??null)!==JSON.stringify(current[key]??null));
+      if(changed.length){
+        const list=el('ul',{class:'audit-diff'});
+        for(const key of changed.slice(0,12)){
+          const li=el('li');li.append(el('b',{},keyNames[key]+': '));
+          if(Object.prototype.hasOwnProperty.call(old,key))li.append(el('span',{class:'old'},formatDiff(key,old[key])),document.createTextNode(' → '));
+          li.append(el('span',{class:'new'},formatDiff(key,current[key])));list.append(li);
+        }
+        box.append(list);
+      }
       parent.append(box);
     }
   }
   function showPanel(panel){
-    if(!['overview','raffles','create','audit'].includes(panel))return;
+    if(!['overview','raffles','create','audit','prize'].includes(panel))return;
     if(panel==='create'&&!canWrite())return note('Tu rol no puede crear rifas.',true);
     state.view=panel;
-    for(const name of ['overview','raffles','create','audit']) $(name+'Panel').hidden = name!==panel;
+    for(const name of ['overview','raffles','create','audit','prize']) $(name+'Panel').hidden = name!==panel;
     document.querySelectorAll('[data-view]').forEach(btn=>btn.classList.toggle('active',btn.dataset.view===panel));
     if(panel==='create'&&!state.editing)clearForm();
     if(panel==='raffles')renderTable();
@@ -222,6 +249,163 @@
     }catch(err){note('No se pudo cambiar el estado: '+(err.message||'error desconocido'),true);}
     finally{state.busy=false;}
   }
+  const BUCKET='ets-prize-drafts';
+  const MAX_IMAGES=8;
+  function canEditPrize(){
+    return canWrite() && state.selectedRaffle?.state==='draft' && !state.selectedRaffle.authorization_verified;
+  }
+  function updatePrizeAccess(){
+    const editable=canEditPrize();
+    forms.prize.querySelectorAll('input,select,textarea').forEach(field=>field.disabled=!editable);
+    $('savePrize').hidden=!editable;
+    $('prizeReadOnly').hidden=editable;
+    forms.photo.hidden=!editable;
+    $('prizeStateTag').textContent=labels[state.selectedRaffle?.state]||'Solo lectura';
+  }
+  async function openPrize(raffleId){
+    const raffle=state.raffles.find(r=>r.id===raffleId);
+    if(!raffle)return note('No encontramos esta rifa.',true);
+    state.selectedRaffle=raffle;state.prize=null;state.photos=[];
+    $('prizeRaffleTitle').textContent=raffle.title;
+    $('prizeSubtitle').textContent='Ficha privada de '+raffle.title+'. Aún no se publica en el catálogo.';
+    forms.prize.reset();forms.photo.reset();
+    $('prizeSaveStatus').textContent='Cargando ficha…';
+    $('galleryStatus').textContent='Cargando fotografías…';
+    $('prizeGallery').replaceChildren();
+    document.querySelector('.prize-nav').hidden=false;
+    showPanel('prize');updatePrizeAccess();
+    await refreshPrize(raffleId);
+  }
+  async function refreshPrize(id){
+    const [{data:p,error:pErr},{data:images,error:iErr}]=await Promise.all([
+      state.client.from('ets_prizes').select('raffle_id,brand,model,prize_condition,prize_details,estimated_value_cop,includes_text,delivery_notes,updated_at').eq('raffle_id',id).maybeSingle(),
+      state.client.from('ets_prize_images').select('id,raffle_id,storage_path,alt_text,is_cover,sort_order,created_at,uploaded_by').eq('raffle_id',id).order('sort_order',{ascending:true}).order('created_at',{ascending:true}).limit(8)
+    ]);
+    if(state.selectedRaffle?.id!==id)return;
+    if(pErr||iErr){note('No se pudo cargar la ficha del premio: '+(pErr?.message||iErr?.message),true);return;}
+    state.prize=p||null;state.photos=images||[];
+    const fields=['brand','model','prize_condition','prize_details','estimated_value_cop','includes_text','delivery_notes'];
+    for(const field of fields)forms.prize.elements[field].value=p?.[field]??(field==='prize_condition'?'new':'');
+    $('prizeSaveStatus').textContent=p?.updated_at?'Último guardado: '+dateFormat(p.updated_at):'Todavía no has guardado la ficha';
+    await renderPhotos();
+  }
+  async function savePrize(event){
+    event.preventDefault();
+    if(!canEditPrize()||state.prizeBusy)return;
+    const form=new FormData(forms.prize);
+    const rawVal=String(form.get('estimated_value_cop')||'').trim();
+    const estimated=rawVal?Number(rawVal):null;
+    if(estimated!==null&&(!Number.isSafeInteger(estimated)||estimated<1||estimated>100000000000))return note('El valor estimado no es válido.',true);
+    const payload={brand:String(form.get('brand')||'').trim(),model:String(form.get('model')||'').trim(),prize_condition:String(form.get('prize_condition')||'new'),prize_details:String(form.get('prize_details')||'').trim(),estimated_value_cop:estimated,includes_text:String(form.get('includes_text')||'').trim(),delivery_notes:String(form.get('delivery_notes')||'').trim()};
+    if(!forms.prize.checkValidity()){forms.prize.reportValidity();return;}
+    state.prizeBusy=true;$('savePrize').disabled=true;
+    try{
+      const id=state.selectedRaffle.id;
+      const request=state.prize
+       ?state.client.from('ets_prizes').update(payload).eq('raffle_id',id).select('raffle_id').single()
+       :state.client.from('ets_prizes').insert({...payload,raffle_id:id,updated_by:state.user.id}).select('raffle_id').single();
+      const {error}=await request;
+      if(error)throw error;
+      await refreshPrize(id);await loadData();
+      note('Ficha guardada en Supabase. Los cambios están en el historial; no está publicada.');
+    }catch(e){note('No pudimos guardar la ficha: '+(e.message||'Error desconocido'),true);}
+    finally{state.prizeBusy=false;$('savePrize').disabled=false;}
+  }
+  async function renderPhotos(){
+    const target=$('prizeGallery');target.replaceChildren();
+    $('galleryStatus').textContent=state.photos.length+' de '+MAX_IMAGES+' imágenes · Solo personal autorizado puede verlas.';
+    if(!state.photos.length){target.append(el('p',{class:'photo-empty'},'Todavía no hay fotografías. Sube una imagen para crear la portada.'));return;}
+    const id=state.selectedRaffle?.id;
+    const results=await Promise.all(state.photos.map(photo=>state.client.storage.from(BUCKET).createSignedUrl(photo.storage_path,120)));
+    if(state.selectedRaffle?.id!==id)return;
+    for(const [i,photo] of state.photos.entries()){
+      const card=el('article',{class:'photo-card'});
+      const visual=el('div',{class:'photo-visual'});
+      if(!results[i].error&&results[i].data?.signedUrl){
+        const img=el('img',{alt:photo.alt_text,loading:'lazy'});img.src=results[i].data.signedUrl;visual.append(img);
+      }else visual.append(el('p',{class:'no-photo'},'Vista previa no disponible. Recarga para renovar el acceso temporal.'));
+      card.append(visual);
+      const info=el('div',{class:'photo-info'});
+      if(photo.is_cover)info.append(el('span',{class:'pill'},'✦ Fotografía principal'));
+      info.append(el('div',{class:'photo-caption'},photo.alt_text));
+      const actions=el('div',{class:'photo-actions'});
+      if(canEditPrize()){
+        if(!photo.is_cover)actions.append(el('button',{type:'button',class:'mini',dataset:{coverPhoto:photo.id}},'Usar de portada'));
+        actions.append(el('button',{type:'button',class:'mini',dataset:{captionPhoto:photo.id}},'Editar texto'));
+        actions.append(el('button',{type:'button',class:'mini',dataset:{deletePhoto:photo.id}},'Quitar'));
+      }
+      info.append(actions);card.append(info);target.append(card);
+    }
+  }
+  async function uploadPhoto(event){
+    event.preventDefault();if(!canEditPrize()||state.prizeBusy)return;
+    const file=forms.photo.elements.photo.files?.[0];
+    const caption=String(new FormData(forms.photo).get('alt_text')||'').trim();
+    if(!file)return note('Selecciona una fotografía.',true);
+    const ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
+    if(!ext||file.size<=0||file.size>5*1024*1024)return note('Solo JPG, PNG o WebP, hasta 5 MB.',true);
+    if(caption.length<4||caption.length>180)return note('Describe la imagen (4 a 180 caracteres).',true);
+    if(state.photos.length>=MAX_IMAGES)return note('Esta rifa ya tiene ocho fotografías.',true);
+    if(!globalThis.crypto?.randomUUID)return note('Tu navegador no admite carga segura de fotografías.',true);
+    state.prizeBusy=true;$('uploadPrizePhoto').disabled=true;
+    const id=state.selectedRaffle.id;
+    const path=`${id}/${state.user.id}/${crypto.randomUUID()}.${ext}`;
+    try{
+      const storage=state.client.storage.from(BUCKET);
+      const uploaded=await storage.upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});
+      if(uploaded.error)throw uploaded.error;
+      const {error}=await state.client.from('ets_prize_images').insert({raffle_id:id,storage_path:path,alt_text:caption,uploaded_by:state.user.id,is_cover:state.photos.length===0,sort_order:state.photos.length}).select('id').single();
+      if(error){await storage.remove([path]);throw error;}
+      forms.photo.reset();await refreshPrize(id);await loadData();
+      note('Fotografía guardada de forma privada. No se muestra al público.');
+    }catch(e){note('No se pudo subir la fotografía: '+(e.message||'Error desconocido'),true);}
+    finally{state.prizeBusy=false;$('uploadPrizePhoto').disabled=false;}
+  }
+  async function setCoverPhoto(id){
+    if(!canEditPrize()||state.prizeBusy)return;
+    const photo=state.photos.find(p=>p.id===id);
+    if(!photo||photo.is_cover)return;
+    state.prizeBusy=true;
+    const old=state.photos.find(p=>p.is_cover);
+    try{
+      if(old){const {error}=await state.client.from('ets_prize_images').update({is_cover:false}).eq('id',old.id);if(error)throw error;}
+      const {error}=await state.client.from('ets_prize_images').update({is_cover:true}).eq('id',photo.id);
+      if(error)throw error;
+      await refreshPrize(state.selectedRaffle.id);await loadData();note('Portada actualizada.');
+    }catch(e){
+      if(old){await state.client.from('ets_prize_images').update({is_cover:true}).eq('id',old.id);}
+      await refreshPrize(state.selectedRaffle.id);note('No se pudo cambiar la portada: '+(e.message||'Error'),true);
+    }finally{state.prizeBusy=false;}
+  }
+  async function updatePhotoCaption(id){
+    if(!canEditPrize()||state.prizeBusy)return;
+    const photo=state.photos.find(p=>p.id===id);if(!photo)return;
+    const next=prompt('Texto descriptivo de la fotografía:',photo.alt_text);
+    if(next===null)return;
+    const caption=next.trim();if(caption.length<4||caption.length>180)return note('El texto debe tener entre 4 y 180 caracteres.',true);
+    state.prizeBusy=true;
+    try{
+      const {error}=await state.client.from('ets_prize_images').update({alt_text:caption}).eq('id',id);
+      if(error)throw error;
+      await refreshPrize(state.selectedRaffle.id);await loadData();note('Descripción de la fotografía actualizada.');
+    }catch(e){note('No se pudo guardar el texto: '+(e.message||'Error'),true);}
+    finally{state.prizeBusy=false;}
+  }
+  async function deletePhoto(id){
+    if(!canEditPrize()||state.prizeBusy)return;
+    const photo=state.photos.find(p=>p.id===id);if(!photo)return;
+    if(!confirm('¿Retirar esta fotografía? El cambio quedará registrado y la acción no se puede deshacer.'))return;
+    state.prizeBusy=true;
+    try{
+      const {error}=await state.client.from('ets_prize_images').delete().eq('id',id);
+      if(error)throw error;
+      const removal=await state.client.storage.from(BUCKET).remove([photo.storage_path]);
+      await refreshPrize(state.selectedRaffle.id);await loadData();
+      if(removal.error)note('Fotografía retirada del catálogo, pero quedó un archivo huérfano. Un administrador debe revisarlo.',true);
+      else note('Fotografía eliminada de la ficha y del almacenamiento privado.');
+    }catch(e){note('No se pudo retirar la fotografía: '+(e.message||'Error'),true);}
+    finally{state.prizeBusy=false;}
+  }
   async function doLogin(event){
     event.preventDefault();setLoginError('');
     const form=new FormData(forms.login);const email=String(form.get('email')||'').trim();const password=String(form.get('password')||'');
@@ -234,13 +418,17 @@
     finally{button.disabled=false;}
   }
   async function doLogout(){
-    await state.client?.auth.signOut();state.staff=null;state.user=null;state.raffles=[];visible('loginView');
+    await state.client?.auth.signOut();state.staff=null;state.user=null;state.raffles=[];state.selectedRaffle=null;state.photos=[];visible('loginView');
     $('accountEmail').textContent='';setLoginError('');
   }
   document.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button)return;
     if(button.id==='themeToggle'){setTheme(document.body.dataset.theme==='dark'?'light':'dark');return;}
     if(button.dataset.view){if(button.dataset.view==='create'){state.editing=null;clearForm();}showPanel(button.dataset.view);return;}
+    if(button.dataset.prize){void openPrize(button.dataset.prize);return;}
+    if(button.dataset.coverPhoto){void setCoverPhoto(button.dataset.coverPhoto);return;}
+    if(button.dataset.captionPhoto){void updatePhotoCaption(button.dataset.captionPhoto);return;}
+    if(button.dataset.deletePhoto){void deletePhoto(button.dataset.deletePhoto);return;}
     if(button.dataset.edit){startEdit(button.dataset.edit);return;}
     if(button.dataset.review){void sendToReview(button.dataset.review);return;}
     if(button.id==='wizardBack'){setStep(state.step-1);return;}
@@ -252,5 +440,7 @@
   $('statusFilter').addEventListener('change',renderTable);
   forms.login.addEventListener('submit',event=>{void doLogin(event);});
   forms.raffle.addEventListener('submit',event=>{void saveRaffle(event);});
+  forms.prize.addEventListener('submit',event=>{void savePrize(event);});
+  forms.photo.addEventListener('submit',event=>{void uploadPhoto(event);});
   void init();
 })();
