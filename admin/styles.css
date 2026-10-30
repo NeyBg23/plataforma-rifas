@@ -43,3 +43,15 @@
 .menu-item.prize-nav[hidden]{display:none}
 @media (max-width:1100px){.upload-zone{grid-template-columns:1fr 1fr}.upload-zone>button{grid-column:1/-1}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:720px){.upload-zone{grid-template-columns:1fr}.upload-zone>button{grid-column:auto}.photo-grid{grid-template-columns:1fr}.prize-intro{align-items:flex-start;flex-wrap:wrap}.prize-intro .pill{margin-left:0}.photo-visual{aspect-ratio:16/10}.section-label{align-items:flex-start}.section-label p{max-width:290px}}
+
+/* V8.1: estado revisable con recuperación controlada */
+.review-locked{display:flex;gap:18px;align-items:center;justify-content:space-between;margin-top:20px;padding:18px 20px;border-radius:16px;background:color-mix(in srgb,var(--orange) 9%,var(--card));border-left:3px solid var(--orange)}
+.review-locked strong{color:var(--orange);font-size:14px}
+.review-locked p{font-size:13px;color:var(--muted);margin:5px 0 0;max-width:650px}
+.review-locked .return-action{flex-shrink:0;background:rgba(255,136,15,.11);border:0;color:var(--orange);font-weight:700;box-shadow:0 2px 16px rgba(255,125,0,.11);white-space:normal;text-align:center}
+.review-locked .return-action:hover{background:rgba(255,136,15,.21);box-shadow:0 0 20px rgba(255,145,18,.19)}
+.mini-return{background:rgba(255,145,18,.10);color:var(--orange);font-weight:700}
+.mini-return:hover{background:rgba(255,145,18,.2)}
+/* Garante que los elementos ocultos no se muestren por display:flex. */
+.review-locked[hidden],.review-locked button[hidden]{display:none!important}
+@media(max-width:700px){.review-locked{flex-direction:column;align-items:stretch}.review-locked .return-action{width:100%}}
