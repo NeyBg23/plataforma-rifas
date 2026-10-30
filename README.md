@@ -97,3 +97,16 @@ La ruta [laboratorio](https://el-toque-de-la-suerte.vercel.app/laboratorio/) req
 - [Arquitectura, pruebas y pendientes](docs/V12_1_CONSOLA_Y_DESPLIEGUE.md).
 - Ejecuta `npm test` para pruebas de dominio y de permisos simulados.
 - Vercel está conectado al repositorio; los cambios en `main` se despliegan automáticamente. Se usa una lista blanca de archivos públicos.
+
+## V13 — presentación de prelanzamiento y Wompi previsto
+
+La página principal redirige a [la experiencia pública unificada](https://el-toque-de-la-suerte.vercel.app/experiencia/) con diseño oscuro/claro, catálogo ficticio, selección ilustrativa y consulta local de simulaciones. Los pagos disponen de una nueva ruta `#/pagos` y de un espacio de Wompi dentro del resumen.
+
+**Wompi NO está integrado ni autorizado**: no hay checkout activo, credenciales, creación de cobros, reservas comerciales, boletas ni webhooks. La función de pago rechaza cualquier intento; el frontend jamás crea transacciones reales. El nombre se muestra como *proveedor previsto*, sujeto a autorización legal, revisión y aprobación comercial por Wompi.
+
+- [Diseño, arquitectura y requisitos de integración](docs/V13_PRELANZAMIENTO_WOMPI.md)
+- [Pruebas de seguridad de pasarela deshabilitada](tests/test_v13_payment.mjs)
+- `npm test`: dominio, autorización de laboratorio y bloqueo de pagos.
+- `npm run build`: obliga a pasar pruebas y solo publica archivos permitidos en `dist/`.
+
+**El repositorio es público y el sitio es de desarrollo.** Antes de un lanzamiento real faltan validación del operador y de cada rifa, controles regulatorios, pruebas de concurrencia/seguridad/ciberseguridad, infraestructura certificable, onboarding del procesador de pagos y validación de webhooks.
