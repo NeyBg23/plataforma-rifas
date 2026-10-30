@@ -1,53 +1,70 @@
-# El toque de la suerte! ✦
+# El toque de la suerte! · V7
 
-**V6 — Experiencia pública intuitiva con dos temas y seguimiento demostrativo.**
+Plataforma de rifas en fase de **desarrollo tecnológico**. Portada pública V6 conservada y nuevo **panel administrativo V7** separado, con diseño negro/naranja neón y tema claro/oscuro.
 
-Prototipo web de una futura plataforma de rifas en Colombia. Identidad visual negro, **naranja neón** y **oro**, con tema claro marfil. **No se reciben pagos, no se venden números ni se emiten boletas reales.**
+> **Importante:** No existe autorización comercial de Coljuegos asociada a este prototipo. Los premios, porcentajes, selecciones y referencias del sitio público son demostrativos. **No se procesan pagos ni se emiten, reservan o venden números reales.**
 
-## Probar la página
+## Ver la web
 
-- Sitio: https://neybg23.github.io/plataforma-rifas/
-- Repositorio: https://github.com/NeyBg23/plataforma-rifas
-- Ejecución local: `python -m http.server 8080`; abrir `http://localhost:8080`.
+- Sitio público: `index.html` (GitHub Pages, raíz).
+- Panel V7: `admin/index.html` (ruta `/admin/`).
+- Base de datos: `database/01_core_schema.sql` (diseño preparado, aún no aplicado).
+- Consultas de revisión: `database/02_security_checks.sql`.
 
-## Novedades V6
+Para ver el código estático localmente:
 
-- Alternancia oscuro/claro; tema persistente en el navegador.
-- Portada, catálogo y fichas de premio renovadas.
-- Selección simulada de hasta cinco números entre una muestra de 30 y resumen previo a continuar.
-- Referencia local `DEMO-XXXXXXXX`, fecha, números elegidos y total de referencia, con **$0 cobrado**.
-- **Mi seguimiento:** consulta local por código o premio.
-- **Resultados:** información honesta de que aún no existen sorteos ni ganadores reales.
-- **Ayuda:** preguntas frecuentes y límites de la demostración.
-- Panel administrativo V5 conservado: borradores, filtros, revisión, edición y respaldo JSON.
+```bash
+python -m http.server 8000
+```
 
-## Recorrido de prueba
+Visita `http://localhost:8000/` y `http://localhost:8000/admin/`. El administrador indicará **“base de datos aún no conectada”** hasta configurar un proyecto Supabase exclusivo.
 
-1. Abrir **Premios** y elegir un ejemplo.
-2. Seleccionar números de la muestra.
-3. Pulsar **Continuar** y comprobar el total.
-4. Pulsar **Guardar simulación**: no se procesa ningún pago.
-5. Ver y buscar el código en **Mi seguimiento**.
-6. Cambiar entre **Claro / Oscuro** desde la cabecera.
+## Arquitectura V7
 
-## Límites y seguridad
+| Componente | Estado | Seguridad |
+|---|---|---|
+| Catálogo público V6 | Demo funcional | Datos ficticios en JS, sin ventas |
+| Login admin V7 | Implementado, pendiente de servicio | Supabase Auth y verificación real de rol |
+| Gestión de borradores | Implementada, pendiente de servicio | INSERT/UPDATE según rol + RLS |
+| Auditoría de cambios | Esquema y vista preparados | Trigger en Postgres, lectura autorizada |
+| Inventario numerado | Restricción SQL preparada | Clave `(raffle_id, number)`, sin escrituras cliente |
+| Pagos, asignación, publicación | Bloqueados | Requerirán servicios, controles y autorización |
 
-- Catálogo, fotos ilustrativas, fechas, porcentajes y cifras son ejemplos, no ofertas reales.
-- La referencia de seguimiento es local, no es una boleta, reserva ni comprobante de pago.
-- `localStorage` no es una base de datos compartida, no brinda trazabilidad oficial ni inventario transaccional.
-- La administración sigue siendo **una demo pública, no un área protegida con login**.
-- No existe pasarela, autenticación real, verificación de edad, cuentas de clientes, auditoría formal, certificación ni autorización para operar rifas.
-- No publicar claves API secretas, certificados privados, datos personales o archivos `.env` en el repositorio.
-- No presentar la plataforma como autorizada por Coljuegos antes de obtener las aprobaciones aplicables.
+## Conectar una base de datos dedicada (tarea pendiente)
 
-## Hitos para operación futura
+**No uses bases de datos de otros proyectos.** Antes de pasar datos reales:
 
-1. Validación regulatoria y documental de gestor, operador y autorización de rifas.
-2. Acceso seguro y roles, verificación legal de participantes y protección de datos.
-3. Datos autorizados de gestor/rifa/premios/condiciones, controles de publicación.
-4. Reservas atómicas, caducidad de reservas, control de concurrencia y boletas únicas.
-5. Órdenes, pasarela, conciliación e idempotencia de pagos.
-6. Eventos auditables, notificaciones y seguimiento privado en distintos dispositivos.
-7. Sorteos y resultados verificables, supervisión, seguridad, pruebas y certificación.
+1. Crea un proyecto Supabase dedicado a **El toque de la suerte!**. La creación puede requerir elegir organización y plan.
+2. En SQL Editor del proyecto nuevo, revisa y ejecuta `database/01_core_schema.sql`. Verifica con `database/02_security_checks.sql` y los Security Advisors.
+3. Crea una cuenta administrativa desde **Authentication → Users** por un canal seguro. **No envíes aquí contraseñas ni secretos.**
+4. Desde SQL Editor, asigna manualmente el rol al usuario correcto (usa el UUID real):
 
-**Marca:** El toque de la suerte! · **Versión:** V6 · **Estado:** prototipo público sin transacciones.
+   ```sql
+   -- Sustituir el UUID tras comprobar identidad y autorización del titular.
+   insert into public.ets_staff_members (user_id, role, enabled)
+   values ('REEMPLAZAR-CON-UUID-DE-AUTH-USERS', 'admin', true);
+   ```
+
+5. Configura **solo** los campos `url` y `publishableKey` en `admin/config.js`, usando la URL y la clave **`sb_publishable_...`** del proyecto nuevo. No publiques `sb_secret_...`, `service_role`, contraseñas ni tokens privados.
+6. En Supabase configura los controles de Auth, permisos de proyecto, URL del sitio y ajustes de seguridad según el ambiente. Verifica login, cierre de sesión, RLS y que un usuario no autorizado no pueda leer ni escribir.
+7. Verifica las autorizaciones y requisitos del operador antes de planificar cualquier lanzamiento comercial.
+
+**Advertencia de arquitectura:** GitHub Pages es alojamiento estático. La seguridad depende de la autenticación y las políticas RLS del servidor, **no** de ocultar archivos HTML o botones. Para pagos, emisión de números, conciliación, validación de identidad y trazabilidad regulatoria hará falta infraestructura de servicios, pruebas y auditoría adicional.
+
+## Roles
+
+- `admin`: prepara/edita borradores, consulta auditoría.
+- `operator`: prepara/edita borradores, consulta auditoría.
+- `auditor`: consulta rifas y auditoría, sin escritura.
+
+La tabla de roles solo es modificable mediante funciones o accesos privilegiados fuera del navegador público. Las políticas impiden que el frontend declare una rifa autorizada o publicada, y no permiten asignar números.
+
+## Validación
+
+- Sintaxis JavaScript: `node --check admin/app.js && node --check app.js`.
+- Demo pública y página de configuración probadas en Chromium para móvil y escritorio.
+- La base SQL necesita validarse **en un proyecto Supabase independiente** antes de usarla; hasta entonces es un diseño revisado pero no ejecutado.
+
+## Seguridad adicional antes de producción
+
+MFA obligatoria para administradores, revisión de RLS y Security Advisors, limitación de intentos, trazabilidad resistente a manipulación, backups verificables, separación de entornos, revisión de dependencias, accesibilidad y pruebas de carga. Para cumplimiento normativo se requiere revisión especializada y certificaciones aplicables.
