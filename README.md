@@ -87,3 +87,13 @@ En Supabase, el esquema privado `ets_order_lab` incluye pedidos de laboratorio, 
 ## V12.1 — despliegues automáticos
 
 Cambio de integración para verificar el flujo GitHub → Vercel. El proyecto sigue siendo de desarrollo, sin pagos ni emisión comercial. El frontend de V12.1 mostrará únicamente datos autorizados por Supabase Auth y RLS.
+
+## V12.1 — consola autenticada de solo lectura
+
+La ruta [laboratorio](https://el-toque-de-la-suerte.vercel.app/laboratorio/) requiere iniciar sesión mediante el administrador en el **mismo dominio**. Antes de consultar datos verifica la sesión real de Supabase Auth y el rol del personal. Las consultas se hacen mediante RLS a `ets_raffles`, `ets_number_allocations` y `ets_raffle_audit`; no se expone el esquema privado de pedidos.
+
+- No permite crear pedidos, retener números, cobrar ni emitir boletas.
+- Usuarios anónimos o sin rol de personal activo no ven métricas internas.
+- [Arquitectura, pruebas y pendientes](docs/V12_1_CONSOLA_Y_DESPLIEGUE.md).
+- Ejecuta `npm test` para pruebas de dominio y de permisos simulados.
+- Vercel está conectado al repositorio; los cambios en `main` se despliegan automáticamente. Se usa una lista blanca de archivos públicos.
