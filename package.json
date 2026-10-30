@@ -1,11 +1,11 @@
 {
   "name": "el-toque-de-la-suerte",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "private": true,
-  "description": "Sitio web de desarrollo de El toque de la suerte! — sin ventas.",
+  "description": "El toque de la suerte! · vista previa de lanzamiento, sin pagos, reservas ni boletas reales.",
   "scripts": {
     "build": "npm test && node scripts/build-site.mjs",
-    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs"
+    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs"
   },
   "engines": {
     "node": ">=20"
