@@ -71,3 +71,15 @@ Se aplicó un **laboratorio PostgreSQL privado**, en el esquema `ets_lab`, para 
 - [Migración SQL V10](database/05_v10_atomic_lab.sql)
 - [Refuerzo de idempotencia](database/06_v10_idempotency_guard.sql)
 - [Prueba SQL reversible](tests/v10_sql_checks.sql)
+
+## V11 — experiencia guiada de cliente + laboratorio de pedidos
+
+Nueva ruta independiente **[/experiencia/](https://neybg23.github.io/plataforma-rifas/experiencia/)** con catálogo ficticio, selector de hasta 5 números de ejemplo, revisión de resumen, referencia local `DEMO-XXXXXXXX`, trazabilidad visual y temas claro/oscuro. **No hay pagos, datos personales reales ni reservas.** El historial en navegador no constituye registro oficial de compra.
+
+En Supabase, el esquema privado `ets_order_lab` incluye pedidos de laboratorio, slots únicos, intentos auditados y vencimientos manuales. No se ha conectado ni expuesto al público. Las asignaciones comerciales permanecen inactivas.
+
+- [Arquitectura, límites y controles pendientes](docs/V11_ARQUITECTURA_Y_PRUEBAS.md)
+- [Código frontend](experiencia/)
+- [Migración privada de laboratorio](database/07_v11_private_orders_lab.sql)
+- [Pruebas de lógica](tests/v11_domain.test.mjs)
+- [Prueba SQL reversible](tests/v11_sql_reversible.sql)
