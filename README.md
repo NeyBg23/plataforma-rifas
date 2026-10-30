@@ -68,3 +68,12 @@ La tabla de roles solo es modificable mediante funciones o accesos privilegiados
 ## Seguridad adicional antes de producción
 
 MFA obligatoria para administradores, revisión de RLS y Security Advisors, limitación de intentos, trazabilidad resistente a manipulación, backups verificables, separación de entornos, revisión de dependencias, accesibilidad y pruebas de carga. Para cumplimiento normativo se requiere revisión especializada y certificaciones aplicables.
+
+## Versión V8 — premio y galería privada
+
+- El administrador incorpora el botón **Premio y fotos** en *Mis rifas*.
+- Permite características del premio y hasta ocho fotografías privadas por borrador.
+- Los cambios quedan trazados en `ets_raffle_audit`.
+- Migración aditiva: `database/03_prizes_gallery_v8.sql`.
+- Más información: [`docs/V8_PREMIOS_Y_FOTOS.md`](docs/V8_PREMIOS_Y_FOTOS.md).
+- No reemplazar `admin/config.js` del proyecto conectado al actualizar: ya incluye la URL y clave pública del proyecto Supabase exclusivo.
