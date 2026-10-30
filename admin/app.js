@@ -18,6 +18,7 @@
   const labels={draft:'Borrador',in_review:'En revisión',awaiting_authorization:'Pendiente de autorización',published:'Publicada',closed:'Finalizada',cancelled:'Cancelada'};
   const roleLabels={admin:'Administrador',operator:'Operador',auditor:'Auditor'};
   const canWrite = () => ['admin','operator'].includes(state.staff?.role) && Boolean(state.staff?.enabled);
+  const canReturnToDraft = raffle => canWrite() && Boolean(raffle) && !raffle.authorization_verified && ['in_review','awaiting_authorization'].includes(raffle.state);
 
   function setTheme(value){
     const theme = value==='light'?'light':'dark';
@@ -116,7 +117,10 @@
       actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
       if(canWrite()&&r.state==='draft'){
         actions.append(el('button',{type:'button',class:'mini',dataset:{edit:r.id}},'Editar'));
-        actions.append(el('button',{type:'button',class:'mini',dataset:{review:r.id}},'Revisar'));
+        actions.append(el('button',{type:'button',class:'mini',dataset:{review:r.id}},'Enviar a revisión'));
+      }
+      if(canReturnToDraft(r)){
+        actions.append(el('button',{type:'button',class:'mini mini-return',dataset:{returnDraft:r.id}},'↶ Volver a borrador'));
       }
       tr.append(actions);tableBody.append(tr);
     }
@@ -240,7 +244,7 @@
     if(!canWrite()||state.busy)return;
     const raffle=state.raffles.find(x=>x.id===id);
     if(!raffle||raffle.state!=='draft')return;
-    if(!confirm('¿Enviar este borrador a revisión interna? No se publicará ni recibirá pagos.'))return;
+    if(!confirm('¿Enviar este borrador a revisión interna?\n\nMientras esté en revisión no podrás editarlo, pero podrás devolverlo a borrador para corregir sus datos y fotografías.\n\nNo se publicará ni recibirá pagos.'))return;
     state.busy=true;
     try{
       const {error}=await state.client.from('ets_raffles').update({state:'in_review'}).eq('id',id);
@@ -248,6 +252,30 @@
       await loadData();note('Enviado a revisión interna. Sin publicación comercial.');
     }catch(err){note('No se pudo cambiar el estado: '+(err.message||'error desconocido'),true);}
     finally{state.busy=false;}
+  }
+  async function returnToDraft(id){
+    if(state.busy||state.prizeBusy)return;
+    // Comprueba los permisos también en PostgreSQL mediante RLS: el navegador no los otorga.
+    const raffle=state.raffles.find(r=>r.id===id);
+    if(!canReturnToDraft(raffle))return note('Solo puedes devolver a borrador una rifa en revisión y sin autorización de publicación.',true);
+    if(!confirm('¿Devolver «'+raffle.title+'» a borrador?\n\nPodrás modificar los datos y fotografías. El cambio quedará registrado en el historial. No se publicará ni se borrará la rifa.'))return;
+    state.busy=true;
+    try{
+      const {data,error}=await state.client.from('ets_raffles').update({state:'draft'})
+        .eq('id',id).eq('state',raffle.state).eq('authorization_verified',false)
+        .select('id').maybeSingle();
+      if(error)throw error;
+      if(!data)throw new Error('La rifa cambió de estado o ya no tienes permisos. Actualiza el listado.');
+      await loadData();
+      if(state.selectedRaffle?.id===id){
+        state.selectedRaffle=state.raffles.find(r=>r.id===id)||null;
+        updatePrizeAccess();
+        await renderPhotos();
+      }
+      note('Rifa devuelta a borrador. Ya puedes editar su ficha y fotografías. El cambio está en Historial.');
+    }catch(err){
+      note('No se pudo devolver a borrador: '+(err.message||'Error desconocido'),true);
+    }finally{state.busy=false;}
   }
   const BUCKET='ets-prize-drafts';
   const MAX_IMAGES=8;
@@ -259,6 +287,10 @@
     forms.prize.querySelectorAll('input,select,textarea').forEach(field=>field.disabled=!editable);
     $('savePrize').hidden=!editable;
     $('prizeReadOnly').hidden=editable;
+    $('prizeReturnDraft').hidden=!canReturnToDraft(state.selectedRaffle);
+    $('prizeReadOnlyText').textContent=canReturnToDraft(state.selectedRaffle)
+      ? 'Esta rifa está en revisión. Para corregir su ficha o subir fotografías, devuélvela a borrador. No perderás los datos y el cambio quedará en el historial.'
+      : 'Esta rifa no está en borrador. La ficha se muestra solo para consulta y no se puede modificar desde aquí.';
     forms.photo.hidden=!editable;
     $('prizeStateTag').textContent=labels[state.selectedRaffle?.state]||'Solo lectura';
   }
@@ -431,6 +463,8 @@
     if(button.dataset.deletePhoto){void deletePhoto(button.dataset.deletePhoto);return;}
     if(button.dataset.edit){startEdit(button.dataset.edit);return;}
     if(button.dataset.review){void sendToReview(button.dataset.review);return;}
+    if(button.dataset.returnDraft){void returnToDraft(button.dataset.returnDraft);return;}
+    if(button.id==='prizeReturnDraft'){if(state.selectedRaffle)void returnToDraft(state.selectedRaffle.id);return;}
     if(button.id==='wizardBack'){setStep(state.step-1);return;}
     if(button.id==='wizardNext'){if(validateStep(state.step))setStep(state.step+1);return;}
     if(button.dataset.step){const wanted=Number(button.dataset.step);if(wanted<=state.step||Array.from({length:wanted-state.step},(_,i)=>state.step+i).every(validateStep))setStep(wanted);return;}
