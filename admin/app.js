@@ -6,7 +6,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const config = window.ETS_PUBLIC_SUPABASE || {};
-  const state = { client:null, user:null, staff:null, raffles:[], audit:[], view:'overview', step:1, editing:null, busy:false, selectedRaffle:null, prize:null, photos:[], prizeBusy:false };
+  const state = { numbersRaffle:null, numbersPage:0, numbersHighlighted:null, numbersLoading:false, numbersRequest:0, client:null, user:null, staff:null, raffles:[], audit:[], view:'overview', step:1, editing:null, busy:false, selectedRaffle:null, prize:null, photos:[], prizeBusy:false };
   const tableBody = $('rafflesRows');
   const forms = { login:$('loginForm'), raffle:$('raffleForm'), prize:$('prizeForm'), photo:$('photoForm') };
   const themeKey='el-toque-v6-tema';
@@ -115,6 +115,7 @@
       const statusCell=el('td');statusCell.append(el('span',{class:'pill'},labels[r.state]||r.state));tr.append(statusCell);
       const actions=el('td');
       actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
+      actions.append(el('button',{type:'button',class:'mini',dataset:{numbers:r.id}},'▦ Números'));
       if(canWrite()&&r.state==='draft'){
         actions.append(el('button',{type:'button',class:'mini',dataset:{edit:r.id}},'Editar'));
         actions.append(el('button',{type:'button',class:'mini',dataset:{review:r.id}},'Enviar a revisión'));
@@ -163,13 +164,14 @@
     }
   }
   function showPanel(panel){
-    if(!['overview','raffles','create','audit','prize'].includes(panel))return;
+    if(!['overview','raffles','create','audit','prize','numbers'].includes(panel))return;
     if(panel==='create'&&!canWrite())return note('Tu rol no puede crear rifas.',true);
     state.view=panel;
-    for(const name of ['overview','raffles','create','audit','prize']) $(name+'Panel').hidden = name!==panel;
+    for(const name of ['overview','raffles','create','audit','prize','numbers']) $(name+'Panel').hidden = name!==panel;
     document.querySelectorAll('[data-view]').forEach(btn=>btn.classList.toggle('active',btn.dataset.view===panel));
     if(panel==='create'&&!state.editing)clearForm();
     if(panel==='raffles')renderTable();
+    if(panel==='numbers'&&!state.numbersRaffle){showPanel('raffles');return;}
     if(panel==='audit')renderAudit();
     window.scrollTo({top:0,behavior:'instant'});
   }
@@ -438,6 +440,112 @@
     }catch(e){note('No se pudo retirar la fotografía: '+(e.message||'Error'),true);}
     finally{state.prizeBusy=false;}
   }
+  // V9: consulta paginada y de solo lectura sobre ets_number_allocations.
+  // Los números sin registro NO se deben presentar como comercialmente disponibles.
+  const NUMBER_PAGE_SIZE=100;
+  const numberStates={held:'Retenido',issued:'Emitido',void:'Anulado'};
+  const allowedNumberStates=new Set(Object.keys(numberStates));
+  function numberString(value,total){
+    const width=Math.max(2,String(Math.max(0,total-1)).length);
+    return String(value).padStart(width,'0');
+  }
+  async function openNumbers(raffleId){
+    const raffle=state.raffles.find(r=>r.id===raffleId);
+    if(!raffle)return note('No encontramos esa rifa.',true);
+    state.numbersRaffle=raffle;state.numbersPage=0;state.numbersHighlighted=null;
+    $('numbersRaffleTitle').textContent=raffle.title;
+    $('numbersRaffleState').textContent=labels[raffle.state]||raffle.state;
+    $('numbersRaffleSubtitle').textContent=`Numeración referencial de ${integer(raffle.total_numbers)} registros: del ${numberString(0,raffle.total_numbers)} al ${numberString(raffle.total_numbers-1,raffle.total_numbers)}.`;
+    $('numberTotal').textContent=integer(raffle.total_numbers);
+    ['numberUnregistered','numberHeld','numberIssuedVoided'].forEach(id=>$(id).textContent='—');
+    $('numberSearchInput').value='';
+    document.querySelector('.number-nav').hidden=false;
+    showPanel('numbers');
+    await refreshNumbers();
+  }
+  async function stepNumbers(delta){
+    const raffle=state.numbersRaffle;
+    if(!raffle||state.numbersLoading)return;
+    const last=Math.ceil(raffle.total_numbers/NUMBER_PAGE_SIZE)-1;
+    const next=Math.min(last,Math.max(0,state.numbersPage+delta));
+    if(next===state.numbersPage)return;
+    state.numbersPage=next;state.numbersHighlighted=null;
+    await refreshNumbers();
+  }
+  async function jumpToNumber(){
+    const raffle=state.numbersRaffle;
+    if(!raffle||state.numbersLoading)return;
+    const entered=$('numberSearchInput').value.trim();
+    if(!/^\d{1,7}$/.test(entered))return note('Escribe un número válido, sin signos ni letras.',true);
+    const value=Number(entered);
+    if(!Number.isSafeInteger(value)||value<0||value>=raffle.total_numbers)return note('El número debe estar dentro del rango de esta rifa.',true);
+    state.numbersPage=Math.floor(value/NUMBER_PAGE_SIZE);
+    state.numbersHighlighted=value;
+    await refreshNumbers();
+    document.querySelector('.number-token.highlight')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  async function refreshNumbers(){
+    const raffle=state.numbersRaffle;
+    if(!raffle||!state.client)return;
+    const requestId=++state.numbersRequest;
+    state.numbersLoading=true;
+    $('numbersLoading').textContent='Consultando registros reales en Supabase…';
+    $('numbersLoading').hidden=false;
+    $('numbersGrid').replaceChildren();
+    $('numbersPrev').disabled=true;$('numbersNext').disabled=true;
+    $('refreshNumbers').disabled=true;
+    const start=state.numbersPage*NUMBER_PAGE_SIZE;
+    const end=Math.min(raffle.total_numbers,start+NUMBER_PAGE_SIZE);
+    try{
+      const base=()=>state.client.from('ets_number_allocations');
+      const [page,allCount,heldCount,issuedCount,voidCount]=await Promise.all([
+        base().select('number,allocation_state').eq('raffle_id',raffle.id).gte('number',start).lt('number',end).order('number',{ascending:true}).limit(NUMBER_PAGE_SIZE),
+        base().select('number',{count:'exact',head:true}).eq('raffle_id',raffle.id),
+        base().select('number',{count:'exact',head:true}).eq('raffle_id',raffle.id).eq('allocation_state','held'),
+        base().select('number',{count:'exact',head:true}).eq('raffle_id',raffle.id).eq('allocation_state','issued'),
+        base().select('number',{count:'exact',head:true}).eq('raffle_id',raffle.id).eq('allocation_state','void')
+      ]);
+      if(requestId!==state.numbersRequest||state.numbersRaffle?.id!==raffle.id)return;
+      const failure=[page,allCount,heldCount,issuedCount,voidCount].find(r=>r.error);
+      if(failure)throw failure.error;
+      const counted=Number(allCount.count??0),held=Number(heldCount.count??0),issued=Number(issuedCount.count??0),voided=Number(voidCount.count??0);
+      if(![counted,held,issued,voided].every(Number.isSafeInteger)||counted>raffle.total_numbers)throw Error('El inventario requiere revisión: se encontraron más registros que números definidos.');
+      $('numberUnregistered').textContent=integer(raffle.total_numbers-counted);
+      $('numberHeld').textContent=integer(held);
+      $('numberIssuedVoided').textContent=integer(issued)+' / '+integer(voided);
+      const allocations=new Map((page.data||[]).filter(row=>Number.isSafeInteger(row.number)&&row.number>=start&&row.number<end).map(row=>[row.number,row.allocation_state]));
+      const grid=$('numbersGrid');
+      const fragment=document.createDocumentFragment();
+      for(let number=start;number<end;number++){
+        const stateName=allocations.get(number);
+        const type=allowedNumberStates.has(stateName)?stateName:'unregistered';
+        const box=el('div',{class:'number-token '+type+(number===state.numbersHighlighted?' highlight':'')});
+        box.append(el('strong',{},numberString(number,raffle.total_numbers)),el('small',{},numberStates[type]||'Sin registro'));
+        box.title=`Número ${numberString(number,raffle.total_numbers)}: ${numberStates[type]||'Sin asignación registrada'}. No puede comprarse desde aquí.`;
+        fragment.append(box);
+      }
+      grid.replaceChildren(fragment);
+      $('numbersLoading').hidden=true;
+      $('numbersPageLabel').textContent=`Página ${state.numbersPage+1} de ${Math.ceil(raffle.total_numbers/NUMBER_PAGE_SIZE)}`;
+      $('numberRangeNote').textContent=`Mostrando ${numberString(start,raffle.total_numbers)} a ${numberString(end-1,raffle.total_numbers)} de ${integer(raffle.total_numbers)} números. Sin emisión ni ventas.`;
+    }catch(error){
+      if(requestId!==state.numbersRequest)return;
+      $('numberUnregistered').textContent='—';
+      $('numberHeld').textContent='—';
+      $('numberIssuedVoided').textContent='—';
+      $('numbersLoading').hidden=false;
+      $('numbersLoading').textContent='No pudimos comprobar el inventario. No se mostrarán datos supuestos.';
+      note('Error consultando inventario: '+(error.message||'Verifica los permisos de lectura.'),true);
+    }finally{
+      if(requestId===state.numbersRequest){
+        state.numbersLoading=false;
+        $('refreshNumbers').disabled=false;
+        $('numbersPrev').disabled=state.numbersPage<=0;
+        $('numbersNext').disabled=state.numbersPage>=Math.ceil(raffle.total_numbers/NUMBER_PAGE_SIZE)-1;
+      }
+    }
+  }
+
   async function doLogin(event){
     event.preventDefault();setLoginError('');
     const form=new FormData(forms.login);const email=String(form.get('email')||'').trim();const password=String(form.get('password')||'');
@@ -450,7 +558,7 @@
     finally{button.disabled=false;}
   }
   async function doLogout(){
-    await state.client?.auth.signOut();state.staff=null;state.user=null;state.raffles=[];state.selectedRaffle=null;state.photos=[];visible('loginView');
+    await state.client?.auth.signOut();state.staff=null;state.user=null;state.raffles=[];state.selectedRaffle=null;state.photos=[];state.numbersRaffle=null;state.numbersRequest++;document.querySelector('.number-nav').hidden=true;visible('loginView');
     $('accountEmail').textContent='';setLoginError('');
   }
   document.addEventListener('click',event=>{
@@ -458,6 +566,11 @@
     if(button.id==='themeToggle'){setTheme(document.body.dataset.theme==='dark'?'light':'dark');return;}
     if(button.dataset.view){if(button.dataset.view==='create'){state.editing=null;clearForm();}showPanel(button.dataset.view);return;}
     if(button.dataset.prize){void openPrize(button.dataset.prize);return;}
+    if(button.dataset.numbers){void openNumbers(button.dataset.numbers);return;}
+    if(button.id==='numbersGoPrize'){if(state.numbersRaffle)void openPrize(state.numbersRaffle.id);return;}
+    if(button.id==='numbersPrev'){void stepNumbers(-1);return;}
+    if(button.id==='numbersNext'){void stepNumbers(1);return;}
+    if(button.id==='refreshNumbers'){void refreshNumbers();return;}
     if(button.dataset.coverPhoto){void setCoverPhoto(button.dataset.coverPhoto);return;}
     if(button.dataset.captionPhoto){void updatePhotoCaption(button.dataset.captionPhoto);return;}
     if(button.dataset.deletePhoto){void deletePhoto(button.dataset.deletePhoto);return;}
@@ -470,6 +583,7 @@
     if(button.dataset.step){const wanted=Number(button.dataset.step);if(wanted<=state.step||Array.from({length:wanted-state.step},(_,i)=>state.step+i).every(validateStep))setStep(wanted);return;}
     if(button.id==='logout'){void doLogout();}
   });
+  $('numberJumpForm').addEventListener('submit',event=>{event.preventDefault();void jumpToNumber();});
   $('searchInput').addEventListener('input',renderTable);
   $('statusFilter').addEventListener('change',renderTable);
   forms.login.addEventListener('submit',event=>{void doLogin(event);});
