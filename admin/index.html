@@ -11,7 +11,7 @@
 </head>
 <body data-theme="dark">
 <div class="topline">PLATAFORMA EN DESARROLLO · SIN VENTAS NI BOLETAS REALES</div>
-<header class="sitehead"><a class="brand" href="../"><span class="star">✦</span><span><strong>El toque de la suerte!</strong><small>Panel de gestión · V8.1</small></span></a><div class="head-actions"><button id="themeToggle" class="btn text small" type="button" aria-label="Cambiar tema">☀ Tema claro</button><a class="btn text small" href="../">← Sitio público</a></div></header>
+<header class="sitehead"><a class="brand" href="../"><span class="star">✦</span><span><strong>El toque de la suerte!</strong><small>Panel de gestión · V9</small></span></a><div class="head-actions"><button id="themeToggle" class="btn text small" type="button" aria-label="Cambiar tema">☀ Tema claro</button><a class="btn text small" href="../">← Sitio público</a></div></header>
 <main>
 <section id="setupView" class="center-screen" hidden>
  <div class="setup-card"><div class="icon-chip">⌘</div><span class="eyebrow">FASE V7 · ACCESO PROTEGIDO</span><h1>La base de datos aún no está conectada.</h1><p>La consola ya tiene la interfaz y las reglas de seguridad preparadas. Se conectará cuando exista un proyecto de Supabase exclusivo para <strong>El toque de la suerte!</strong>.</p><div class="check-row">✓ Código publicado en GitHub</div><div class="check-row">✓ Modelo PostgreSQL y permisos RLS preparados</div><div class="check-row pending">○ Falta configurar URL y clave publicable del nuevo proyecto</div><div class="check-row pending">○ Falta crear el primer usuario administrador autorizado</div><p class="subtle">Este estado es intencional. No se muestran ni se modifican datos reales.</p><a class="btn primary" href="../">Volver a la página pública <span>↗</span></a></div>
@@ -21,7 +21,7 @@
 </section>
 <section id="loadingView" class="center-screen" aria-live="polite"><p>Verificando acceso seguro…</p></section>
 <section id="dashboardView" class="workspace" hidden>
- <aside class="sidebar"><span class="eyebrow">MENÚ PRINCIPAL</span><button type="button" data-view="overview" class="menu-item active"><span>◈</span> Inicio</button><button type="button" data-view="raffles" class="menu-item"><span>▤</span> Mis rifas</button><button type="button" data-view="create" class="menu-item write-only"><span>＋</span> Crear rifa</button><button type="button" data-view="audit" class="menu-item"><span>◎</span> Historial</button><button type="button" data-view="prize" class="menu-item prize-nav" hidden><span>✧</span> Ficha del premio</button><div class="side-help"><strong>¿Qué hace este panel?</strong><p>Permite preparar y revisar rifas. Publicar y vender sigue bloqueado por seguridad.</p></div><div class="account"><small id="accountRole"></small><strong id="accountEmail"></strong><button id="logout" type="button" class="btn text">Cerrar sesión ↗</button></div></aside>
+ <aside class="sidebar"><span class="eyebrow">MENÚ PRINCIPAL</span><button type="button" data-view="overview" class="menu-item active"><span>◈</span> Inicio</button><button type="button" data-view="raffles" class="menu-item"><span>▤</span> Mis rifas</button><button type="button" data-view="create" class="menu-item write-only"><span>＋</span> Crear rifa</button><button type="button" data-view="audit" class="menu-item"><span>◎</span> Historial</button><button type="button" data-view="prize" class="menu-item prize-nav" hidden><span>✧</span> Ficha del premio</button><button type="button" data-view="numbers" class="menu-item number-nav" hidden><span>▦</span> Control de números</button><div class="side-help"><strong>¿Qué hace este panel?</strong><p>Permite preparar y revisar rifas. Publicar y vender sigue bloqueado por seguridad.</p></div><div class="account"><small id="accountRole"></small><strong id="accountEmail"></strong><button id="logout" type="button" class="btn text">Cerrar sesión ↗</button></div></aside>
  <div class="content"><div id="notice" class="notice" role="status" hidden></div>
   <section id="overviewPanel" class="panel"><div class="page-heading"><div><span class="eyebrow">RESUMEN</span><h1>Tu centro de control.</h1><p>Un vistazo sencillo a los borradores y su revisión.</p></div><button class="btn primary write-only" data-view="create">＋ Crear rifa</button></div><div class="metrics"><article class="metric"><span>Total de rifas</span><strong id="metricTotal">—</strong></article><article class="metric"><span>Borradores</span><strong id="metricDraft">—</strong></article><article class="metric"><span>En revisión</span><strong id="metricReview">—</strong></article><article class="metric"><span>Autorizadas para venta</span><strong>0 <small>Ventas desactivadas</small></strong></article></div><article class="frame"><h2>¿Por dónde empezar?</h2><div class="steps"><div><b>01</b><strong>Crear borrador</strong><p>Describe el premio y configura los números.</p></div><div><b>02</b><strong>Revisar datos</strong><p>Comprueba descripción, valores y fecha.</p></div><div><b>03</b><strong>Verificar requisitos</strong><p>La publicación requiere autorización y validaciones externas.</p></div></div></article></section>
   <section id="rafflesPanel" class="panel" hidden><div class="page-heading"><div><span class="eyebrow">GESTIÓN DE RIFAS</span><h1>Rifas y borradores.</h1><p>Busca, consulta y edita lo que has preparado.</p></div><button class="btn primary write-only" data-view="create">＋ Nueva rifa</button></div><div class="frame"><div class="toolbar"><label>Buscar<input id="searchInput" type="search" placeholder="Buscar por nombre o categoría"></label><label>Estado<select id="statusFilter"><option value="all">Todos</option><option value="draft">Borradores</option><option value="in_review">En revisión</option><option value="awaiting_authorization">Pendientes de autorización</option></select></label></div><div class="table-wrap"><table><thead><tr><th>Rifa</th><th>Valor / número</th><th>Números</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="rafflesRows"></tbody></table></div><div id="emptyList" class="empty" hidden>No hay rifas con estos filtros. Empieza creando un borrador.</div></div></section>
@@ -55,6 +55,34 @@
       </form>
       <p id="galleryStatus" class="small-note" aria-live="polite">Las imágenes no se muestran en la página pública.</p>
       <div id="prizeGallery" class="photo-grid" aria-live="polite"></div>
+    </div>
+  </section>
+  <section id="numbersPanel" class="panel" hidden>
+    <div class="page-heading numbers-heading">
+      <div><span class="eyebrow">INVENTARIO DE NÚMEROS · V9</span><h1>Control de números.</h1><p>Consulta interna: ninguna cifra de esta pantalla equivale a una venta o reserva confirmada.</p></div>
+      <div class="number-heading-actions"><button type="button" class="btn text" id="numbersGoPrize">✧ Completar ficha del premio</button><button type="button" class="btn text" data-view="raffles">← Mis rifas</button></div>
+    </div>
+    <div class="number-ribbon">
+      <span class="step-token">▦</span><div><strong id="numbersRaffleTitle">Elige una rifa</strong><p id="numbersRaffleSubtitle">Numeración en preparación para futuras pruebas.</p></div>
+      <span id="numbersRaffleState" class="pill">Sin seleccionar</span>
+    </div>
+    <div class="number-explainer" role="note"><strong>Solo consulta. Sin ventas habilitadas.</strong><p>Un número <b>sin registro</b> no significa que esté autorizado para la venta. Las reservas, expiraciones y compras se implementarán más adelante con operaciones seguras en el servidor.</p></div>
+    <div class="number-metrics" aria-live="polite">
+      <article><small>Numeración total</small><strong id="numberTotal">—</strong></article>
+      <article><small>Sin asignación registrada</small><strong id="numberUnregistered">—</strong></article>
+      <article><small>Retenidos en base</small><strong id="numberHeld">—</strong></article>
+      <article><small>Emitidos / Anulados</small><strong id="numberIssuedVoided">—</strong></article>
+    </div>
+    <div class="frame number-inventory">
+      <div class="number-head"><div><h2>Numeración de prueba</h2><p id="numberRangeNote">Elige una rifa para consultar su numeración.</p></div><button type="button" class="btn text" id="refreshNumbers">↻ Actualizar datos</button></div>
+      <div class="number-controls">
+        <form id="numberJumpForm" class="number-jump"><label for="numberSearchInput">Buscar número<input id="numberSearchInput" type="text" inputmode="numeric" autocomplete="off" maxlength="7" placeholder="Ej. 07" /></label><button type="submit" class="btn primary">Buscar ↗</button></form>
+        <div class="number-pagination"><button type="button" id="numbersPrev" class="btn text">← Anterior</button><span id="numbersPageLabel">Página —</span><button type="button" id="numbersNext" class="btn text">Siguiente →</button></div>
+      </div>
+      <div class="number-key"><span><i class="number-dot blank"></i> Sin registro</span><span><i class="number-dot held"></i> Retenido</span><span><i class="number-dot issued"></i> Emitido</span><span><i class="number-dot void"></i> Anulado</span></div>
+      <p id="numbersLoading" class="number-loading" role="status" aria-live="polite">Selecciona una rifa para comenzar.</p>
+      <div id="numbersGrid" class="number-grid" aria-label="Números de la rifa"></div>
+      <p class="number-footnote">No es un selector de compra. No se modifica ningún número desde esta pantalla. Las asignaciones futuras requieren autorización, registros de pago y protección contra duplicados.</p>
     </div>
   </section>
   <section id="auditPanel" class="panel" hidden><div class="page-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h1>Historial de cambios.</h1><p>Un registro de las operaciones sobre las rifas. No se puede editar desde el panel.</p></div></div><div class="frame"><div id="auditRows" class="timeline"></div></div></section>
