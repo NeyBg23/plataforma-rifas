@@ -1,11 +1,11 @@
 {
   "name": "el-toque-de-la-suerte",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
-  "description": "El toque de la suerte! · vista previa de lanzamiento, sin pagos, reservas ni boletas reales.",
+  "description": "El toque de la suerte! · portada pública con catálogo autorizado y demostración separada, sin pagos comerciales.",
   "scripts": {
     "build": "npm test && node scripts/build-site.mjs",
-    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs"
+    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs tests/test_v14_public.mjs"
   },
   "engines": {
     "node": ">=20"
