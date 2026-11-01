@@ -110,3 +110,13 @@ La página principal redirige a [la experiencia pública unificada](https://el-t
 - `npm run build`: obliga a pasar pruebas y solo publica archivos permitidos en `dist/`.
 
 **El repositorio es público y el sitio es de desarrollo.** Antes de un lanzamiento real faltan validación del operador y de cada rifa, controles regulatorios, pruebas de concurrencia/seguridad/ciberseguridad, infraestructura certificable, onboarding del procesador de pagos y validación de webhooks.
+
+## V14 — portada pública real y catálogo con RLS
+
+- La dirección raíz `/` ya no redirige al simulador; contiene una portada independiente responsive con temas oscuro y claro, secciones de información y una zona de catálogo.
+- El catálogo consulta **solo por lectura** `public.ets_raffles` en Supabase mediante clave publicable. La política RLS limita el acceso a rifas publicadas, con autorización verificada y fecha de sorteo. Mientras no existan campañas así habilitadas, se presenta un estado vacío honesto.
+- La simulación ficticia permanece en `/experiencia/`, separada de las campañas reales.
+- Wompi continúa señalado como proveedor **previsto y desactivado**. No hay cobros, reservas ni emisión de boletas.
+- El sistema de compilación verifica pruebas V11-V14 y publica una lista blanca de archivos estáticos; nunca incluye SQL ni credenciales privadas.
+
+[Arquitectura V14 y hoja de ruta V15-V18](docs/V14_PORTADA_PUBLICA_Y_PROXIMOS_PASOS.md).
