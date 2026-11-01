@@ -1,9 +1,109 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>El toque de la suerte! · Experiencia digital</title>
-<meta name="description" content="Vista previa de El toque de la suerte! — diseño de experiencia, sin pagos, reservas ni emisión de boletas."/>
-<meta name="robots" content="noindex,nofollow"/><meta name="theme-color" content="#0b0b0d"/>
-<link rel="icon" type="image/svg+xml" href="favicon.svg"/>
-<meta http-equiv="refresh" content="0;url=experiencia/"/>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 85% 5%,#37200e,#0b0b0d 55%);color:#faf6ef;font-family:system-ui,sans-serif}.box{text-align:center;padding:3rem;max-width:560px}.star{display:block;font-size:54px;color:#ff9a29;text-shadow:0 0 24px #ff802c80}h1{font-size:clamp(30px,5vw,52px);letter-spacing:-.04em}p{color:#b6ada1;line-height:1.7}a{color:#ffc36b;text-underline-offset:6px}.badge{font-size:11px;letter-spacing:.08em;color:#f5be84}</style></head>
-<body><main class="box"><span class="star" aria-hidden="true">✦</span><span class="badge">VISTA PREVIA · SIN VENTAS</span><h1>El toque de la suerte!</h1><p>Te llevamos a nuestra nueva experiencia digital. Los premios y valores son ilustrativos; no aceptamos pagos ni emitimos boletas.</p><a href="experiencia/">Entrar a la experiencia →</a></main><script>location.replace(new URL('experiencia/'+location.hash,location.href).href);</script></body></html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0d12" />
+  <meta name="description" content="El toque de la suerte!: conoce la plataforma, consulta campañas habilitadas y explora nuestra experiencia digital de demostración." />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>El toque de la suerte! · Experiencias con claridad</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css?v=14.0.0" />
+  <script src="admin/config.js" defer></script>
+  <script type="module" src="site.mjs?v=14.0.0"></script>
+</head>
+<body data-theme="dark">
+  <div class="announcement"><span class="status-light"></span> PLATAFORMA EN DESARROLLO <span class="sep">·</span> NO SE RECIBEN PAGOS NI SE EMITEN BOLETAS</div>
+  <header class="site-header" id="inicio">
+    <div class="shell header-inner">
+      <a href="#inicio" class="identity" aria-label="El toque de la suerte, inicio">
+        <span class="identity-star" aria-hidden="true">✦</span>
+        <span class="identity-name"><strong>El toque de la suerte!</strong><small>Experiencias que inspiran</small></span>
+      </a>
+      <nav class="desktop-nav" aria-label="Navegación principal">
+        <a href="#campanas">Campañas</a><a href="#como-funciona">Cómo funciona</a><a href="#confianza">Seguridad</a><a href="#preguntas">Ayuda</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" type="button" id="theme-toggle" aria-label="Activar tema claro" title="Cambiar tema"><span aria-hidden="true" id="theme-glyph">☀</span><span class="theme-caption" id="theme-label">Tema claro</span></button>
+        <a href="experiencia/" class="header-demo">Explorar demo <span aria-hidden="true">↗</span></a>
+        <button class="icon-btn mobile-toggle" type="button" id="menu-toggle" aria-expanded="false" aria-controls="mobile-nav" aria-label="Abrir menú"><span aria-hidden="true">☰</span></button>
+      </div>
+    </div>
+    <nav class="mobile-nav shell" id="mobile-nav" aria-label="Navegación móvil" hidden>
+      <a href="#campanas">Campañas</a><a href="#como-funciona">Cómo funciona</a><a href="#confianza">Seguridad</a><a href="#preguntas">Ayuda</a><a href="experiencia/">Probar demostración</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+      <div class="shell hero-layout">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="eyebrow-line"></span> UNA NUEVA FORMA DE VIVIR LA EMOCIÓN</span>
+          <h1 id="hero-title">La emoción de participar. <span class="highlight-text">Con todo a la vista.</span></h1>
+          <p>Estamos construyendo una experiencia digital fácil de explorar, clara en cada paso y diseñada para que siempre sepas dónde encontrar la información importante.</p>
+          <div class="hero-cta">
+            <a class="action-main" href="#campanas">Ver campañas <span aria-hidden="true">↗</span></a>
+            <a class="action-secondary" href="experiencia/">Conocer la experiencia <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="hero-meta"><span><span class="tiny-diamond">✦</span> Diseño para móvil</span><span><span class="tiny-diamond">✦</span> Consulta transparente</span><span><span class="tiny-diamond">✦</span> Tema claro y oscuro</span></div>
+        </div>
+        <div class="hero-stage" aria-label="Ilustración del recorrido de participación, aún no disponible comercialmente">
+          <div class="stage-aura"></div><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+          <div class="glow-number number-top">08</div><div class="glow-number number-bottom">27</div>
+          <div class="stage-card">
+            <div class="stage-top"><span class="stage-brand">✦ <span>EL TOQUE</span></span><span class="stage-demo">Vista ilustrativa</span></div>
+            <div class="stage-icon" aria-hidden="true">✧</div>
+            <div class="stage-label">Una experiencia a tu manera</div>
+            <div class="stage-subtitle">Todo empieza con una elección.</div>
+            <div class="stage-grid" aria-hidden="true"><span>03</span><span>07</span><span>12</span><span>18</span><span>26</span><span>39</span></div>
+            <div class="stage-footer"><span>Simple. Claro. A tu ritmo.</span><span>↗</span></div>
+          </div>
+          <div class="stage-sticker">✦ <span>Diseñado para sorprender</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="campanas" class="section campaigns-section" aria-labelledby="campaigns-title">
+      <div class="shell">
+        <div class="section-head"><div><span class="eyebrow"><span class="eyebrow-line"></span> EXPLORA CON CONFIANZA</span><h2 id="campaigns-title">Campañas habilitadas<span class="accent">.</span></h2><p>Aquí aparecerán únicamente campañas cuya publicación esté habilitada y registrada en el sistema.</p></div><div class="section-right"><span class="outline-pill"><span class="status-dot"></span> Estado consultado en Supabase</span></div></div>
+        <div id="campaign-status" class="campaign-status" role="status" aria-live="polite"><span class="loading-ring"></span> Comprobando campañas habilitadas…</div>
+        <div id="campaign-list" class="campaign-grid" aria-live="polite"></div>
+        <div class="campaigns-bottom"><span>¿Quieres conocer cómo se vería una participación?</span><a href="experiencia/">Explorar demostración ficticia <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+
+    <section class="section showcase-section" aria-labelledby="demo-title">
+      <div class="shell showroom">
+        <div class="showroom-art" aria-hidden="true">
+          <div class="showroom-glare"></div>
+          <img class="showroom-image" src="experiencia/assets/premio-1.svg" alt="" loading="lazy" />
+          <span class="art-label">PREMIO ILUSTRATIVO · NO DISPONIBLE PARA VENTA</span>
+        </div>
+        <div class="showroom-content"><span class="eyebrow"><span class="eyebrow-line"></span> DESCUBRE EL RECORRIDO</span><h2 id="demo-title">Mira cómo se siente. <span class="highlight-text">Sin compromisos.</span></h2><p>Conoce nuestro selector de números, el resumen paso a paso y la consulta de una referencia de prueba. Todo es ficticio y funciona sin dinero ni información personal.</p><div class="showroom-highlights"><span>01. Explorar</span><span>02. Elegir</span><span>03. Revisar</span><span>04. Consultar</span></div><a class="action-main" href="experiencia/">Probar recorrido de demostración <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+
+    <section id="como-funciona" class="section how-section" aria-labelledby="how-title">
+      <div class="shell"><div class="section-head"><div><span class="eyebrow"><span class="eyebrow-line"></span> FÁCIL DESDE EL PRIMER TOQUE</span><h2 id="how-title">Una experiencia sin enredos<span class="accent">.</span></h2><p>Este es el recorrido que estamos preparando para cuando pueda funcionar comercialmente.</p></div></div>
+        <div class="steps-grid">
+          <article class="step-card"><span class="step-index">01 / DESCUBRE</span><div class="step-art">⌑</div><h3>Conoce cada premio</h3><p>Detalles completos, condiciones y documentación verificable antes de elegir.</p></article>
+          <article class="step-card"><span class="step-index">02 / ELIGE</span><div class="step-art">#</div><h3>Explora los números</h3><p>Una selección clara y un resumen que facilite revisar lo que estás haciendo.</p></article>
+          <article class="step-card"><span class="step-index">03 / VERIFICA</span><div class="step-art">◇</div><h3>Revisa cada paso</h3><p>Estado, información relevante y comprobaciones disponibles desde un mismo lugar.</p></article>
+          <article class="step-card"><span class="step-index">04 / CONSULTA</span><div class="step-art">↗</div><h3>Sigue el resultado</h3><p>Información del sorteo y seguimiento transparente cuando exista operación habilitada.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="confianza" class="section trust-section" aria-labelledby="trust-title"><div class="shell trust-layout"><div class="trust-intro"><span class="eyebrow"><span class="eyebrow-line"></span> LO QUE ESTAMOS CONSTRUYENDO</span><h2 id="trust-title">La confianza no debería ser una apuesta<span class="accent">.</span></h2><p>La presentación es importante, pero la ingeniería es lo que permitirá respaldar cada operación. Estas son las capacidades que estamos desarrollando y validando.</p></div><div class="trust-cards"><div class="trust-card"><div class="trust-symbol">◈</div><div><h3>Trazabilidad</h3><p>Historial de operaciones y referencias verificables, sujeto a pruebas de integración.</p></div></div><div class="trust-card"><div class="trust-symbol">⌁</div><div><h3>Reglas de autorización</h3><p>Las campañas solo pueden mostrarse cuando cumplen las condiciones de publicación del sistema.</p></div></div><div class="trust-card"><div class="trust-symbol">✧</div><div><h3>Pagos protegidos</h3><p>Wompi es una opción prevista. Aún no se realizan pagos ni se procesa información financiera.</p></div></div></div></div></section>
+
+    <section class="section payment-section" id="pagos" aria-labelledby="payment-title"><div class="shell payment-panel"><div class="payment-symbol" aria-hidden="true">↗</div><div class="payment-description"><span class="eyebrow">FUTURA INTEGRACIÓN</span><h2 id="payment-title">Una experiencia de pago sencilla.</h2><p>Estamos preparando la arquitectura para integrar un proveedor de pago. Wompi es la opción que estamos evaluando, sujeta a aprobación, verificaciones y pruebas.</p></div><div class="payment-provider"><span class="provider-name">Wompi</span><span class="provider-label">Previsto · No habilitado</span><button type="button" disabled aria-disabled="true">Pagos no disponibles</button></div></div></section>
+
+    <section id="preguntas" class="section faq-section" aria-labelledby="faq-title"><div class="shell faq-layout"><div><span class="eyebrow"><span class="eyebrow-line"></span> RESOLVEMOS TUS DUDAS</span><h2 id="faq-title">Todo más claro, <span class="highlight-text">desde el principio.</span></h2><p>Información sobre el estado actual de esta plataforma.</p></div><div class="faq-list"><details><summary>¿Ya puedo comprar números?</summary><p>No. Por ahora la plataforma está en desarrollo. No se reciben pagos, no se reservan números comerciales ni se emiten boletas.</p></details><details><summary>¿Por qué todavía no aparecen campañas?</summary><p>El catálogo consulta únicamente campañas publicadas y habilitadas. Los borradores del administrador permanecen privados.</p></details><details><summary>¿La demostración crea una participación real?</summary><p>No. La ruta de demostración usa premios ficticios y guarda referencias locales sin valor comercial ni posibilidad de reclamar premios.</p></details><details><summary>¿Se podrá pagar con Wompi?</summary><p>Es un proveedor previsto. Solo se habilitará después de completar la integración técnica, las aprobaciones comerciales y los requisitos legales aplicables.</p></details></div></div></section>
+  </main>
+  <footer class="footer"><div class="shell footer-top"><div><div class="footer-brand">✦ <strong>El toque de la suerte!</strong></div><p>Una plataforma que se construye con claridad en cada paso.</p></div><div class="footer-links"><a href="#campanas">Campañas</a><a href="#como-funciona">Cómo funciona</a><a href="experiencia/">Demostración</a><a href="admin/">Acceso administrativo</a></div></div><div class="shell footer-bottom"><span>© 2026 El toque de la suerte! · Versión de desarrollo</span><span>Sin ventas, pagos ni boletas reales. La publicación comercial requiere autorizaciones.</span></div></footer>
+</body>
+</html>
