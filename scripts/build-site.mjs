@@ -16,7 +16,11 @@ const allowed = [
   'admin/v9.html',
   'admin/styles.css',
   'admin/app.js',
-  'admin/config.js', // solo URL y clave publicable; nunca service_role.
+  'admin/config.js',
+  'admin/expediente.html',
+  'admin/dossier.css',
+  'admin/dossier.mjs',
+  'admin/dossier-domain.mjs', // solo URL y clave publicable; nunca service_role.
   'experiencia/index.html',
   'experiencia/styles.css',
   'experiencia/app.mjs',
