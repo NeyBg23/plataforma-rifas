@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="theme-color" content="#0b0b0e"/>
+  <title>Expediente de campaña · El toque de la suerte!</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="dossier.css?v=15.0.0"/>
+  <script src="config.js?v=15.0.0"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+  <script type="module" src="dossier.mjs?v=15.0.0"></script>
+</head>
+<body data-theme="dark">
+  <div class="development-bar">✦ PLATAFORMA EN DESARROLLO · EXPEDIENTE INTERNO · SIN AUTORIZACIÓN COMERCIAL</div>
+  <header class="topbar">
+    <a class="brand" href="./"><span class="brand-glyph">✦</span><span><strong>El toque de la suerte!</strong><small>Centro de campañas · V15</small></span></a>
+    <div class="top-actions"><button type="button" class="link-button" id="themeButton">☀ Tema claro</button><a class="link-button" href="./">← Administrador</a></div>
+  </header>
+  <div id="loading" class="load-shell"><span class="orbit">✦</span><h1>Verificando el expediente…</h1><p>Comprobando tu sesión y los permisos del servidor.</p></div>
+  <section id="blocked" class="blocked" hidden><span class="orbit">◇</span><h1>Acceso restringido</h1><p id="blockedMessage">No fue posible verificar los permisos de acceso.</p><a class="glow-link" href="./">Volver al administrador ↗</a></section>
+  <div class="layout" id="workspace" hidden>
+    <aside class="sidebar">
+      <span class="small-caps">EXPEDIENTE DE CAMPAÑA</span>
+      <strong id="sideRaffleName">Campaña</strong>
+      <p id="sideState">Borrador</p>
+      <div class="sidebar-divider"></div>
+      <nav class="aside-nav" aria-label="Secciones del expediente">
+        <a href="#resumen"><span>01</span> Resumen y controles</a>
+        <a href="#datos"><span>02</span> Organizador y autoridad</a>
+        <a href="#documentos"><span>03</span> Soportes privados</a>
+        <a href="#revision"><span>04</span> Historial de revisión</a>
+      </nav>
+      <div class="sidebar-divider"></div>
+      <div class="note-panel"><span class="small-caps">CUSTODIA DOCUMENTAL</span><p>Los soportes se guardan en almacenamiento privado. Ningún archivo cargado equivale a autorización o publicación.</p></div>
+      <a class="side-back" href="./">← Volver a Mis rifas</a>
+    </aside>
+    <main class="content">
+      <section class="intro" id="resumen">
+        <div><span class="eyebrow">GESTIÓN DE CAMPAÑAS · V15</span><h1>Todo bajo <em>control.</em></h1><p>Organiza la información y prepara cada campaña para revisión externa, sin habilitar ventas.</p></div>
+        <span class="status-badge" id="raffleState">Borrador</span>
+      </section>
+      <div class="warning" role="note"><strong>Publicación comercial bloqueada.</strong> La carga de soportes y las observaciones no verifican autorizaciones ante autoridades ni permiten emitir boletas o cobrar.</div>
+      <section class="section" aria-labelledby="checklistTitle">
+        <div class="section-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2 id="checklistTitle">Preparación del expediente</h2><p>Indicadores de completitud documental. No representan certificación ni aprobación legal.</p></div><div class="progress-summary"><strong id="doneCount">0 / 7</strong><span>Controles documentales</span></div></div>
+        <div class="progress-track" role="progressbar" aria-label="Completitud interna" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0" id="progressTrack"><span id="progressFill"></span></div>
+        <div class="checklist" id="checklist"></div>
+      </section>
+      <section class="section surface" id="datos">
+        <div class="section-heading"><div><span class="eyebrow">DATOS DECLARADOS</span><h2>Organizador y autoridad</h2><p>Registra quién gestiona la campaña y la entidad competente según el expediente.</p></div><span class="section-icon">01</span></div>
+        <form id="dossierForm" novalidate>
+          <div class="fields two">
+            <label>Organizador o gestor <span class="hint">Declarado</span><input name="organizer_name" maxlength="200" placeholder="Nombre del organizador" autocomplete="off" required/></label>
+            <label>Autoridad competente <span class="hint">Declarada</span><input name="competent_authority" maxlength="200" placeholder="Entidad que debe autorizar" autocomplete="off" required/></label>
+          </div>
+          <label>Referencia del acto de autorización <span class="hint">No verificada</span><input name="authorization_reference_claimed" maxlength="160" placeholder="Número o código, si existe" autocomplete="off"/></label>
+          <label>Observaciones sobre el expediente <textarea name="supporting_notes" maxlength="4000" rows="4" placeholder="Información adicional o asuntos pendientes de validar"></textarea></label>
+          <div class="form-foot"><span id="dossierUpdated">Aún no se ha guardado la ficha documental.</span><button class="neon-action" type="submit" id="saveDossier">Guardar información <span>↗</span></button></div>
+        </form>
+        <p class="form-tip">Esta información es una declaración interna: no confirma que una autorización exista o esté vigente.</p>
+      </section>
+      <section class="section surface" id="documentos">
+        <div class="section-heading"><div><span class="eyebrow">ARCHIVO PRIVADO</span><h2>Soportes documentales</h2><p>Adjunta PDFs o imágenes para revisión, hasta 10 MB cada uno.</p></div><span class="section-icon">02</span></div>
+        <form id="documentForm" novalidate>
+          <div class="fields two"><label>Tipo de documento<select name="document_kind" required><option value="authorization_claim">Soporte de autorización declarada</option><option value="prize_support">Soporte del premio</option><option value="organizer_support">Soporte del organizador</option><option value="other">Otro soporte</option></select></label>
+          <label>Seleccionar archivo<input name="document" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required/></label></div>
+          <div class="form-foot"><span>Una vez registrado, el soporte queda en el historial y no se elimina desde aquí.</span><button class="neon-action" type="submit" id="uploadDocument">Añadir documento <span>↗</span></button></div>
+        </form>
+        <div class="document-list" id="documentList"><div class="empty">Aún no hay soportes adjuntos.</div></div>
+      </section>
+      <section class="section surface" id="revision">
+        <div class="section-heading"><div><span class="eyebrow">REVISIÓN INTERNA</span><h2>Observaciones y seguimiento</h2><p>Registra decisiones preparatorias con fecha y usuario; no se pueden editar ni eliminar.</p></div><span class="section-icon">03</span></div>
+        <form id="reviewForm" novalidate>
+          <label>Tipo de observación<select name="note_type"><option value="observation">Observación interna</option><option value="request_changes">Solicitar correcciones</option><option value="ready_for_external_review">Preparado para revisión externa</option></select></label>
+          <label>Detalle<textarea name="content" rows="3" minlength="5" maxlength="2000" placeholder="Explica qué se revisó y qué sigue pendiente" required></textarea></label>
+          <div class="form-foot"><span>«Preparado para revisión» no equivale a autorización.</span><button class="neon-action" type="submit" id="saveReview">Registrar observación <span>↗</span></button></div>
+        </form>
+        <div id="reviewList" class="review-list"><div class="empty">No hay observaciones.</div></div>
+      </section>
+      <footer class="footnote">© 2026 El toque de la suerte! · Expediente privado en desarrollo · Sin ventas ni boletas reales</footer>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
