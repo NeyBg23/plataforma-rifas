@@ -115,6 +115,7 @@
       const statusCell=el('td');statusCell.append(el('span',{class:'pill'},labels[r.state]||r.state));tr.append(statusCell);
       const actions=el('td');
       actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
+      actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'▤ Expediente'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{numbers:r.id}},'▦ Números'));
       if(canWrite()&&r.state==='draft'){
         actions.append(el('button',{type:'button',class:'mini',dataset:{edit:r.id}},'Editar'));
@@ -565,6 +566,10 @@
     const button=event.target.closest('button');if(!button)return;
     if(button.id==='themeToggle'){setTheme(document.body.dataset.theme==='dark'?'light':'dark');return;}
     if(button.dataset.view){if(button.dataset.view==='create'){state.editing=null;clearForm();}showPanel(button.dataset.view);return;}
+    if(button.dataset.dossier){
+      if(/^[0-9a-f-]{36}$/i.test(button.dataset.dossier))location.assign('expediente.html?rifa='+encodeURIComponent(button.dataset.dossier));
+      return;
+    }
     if(button.dataset.prize){void openPrize(button.dataset.prize);return;}
     if(button.dataset.numbers){void openNumbers(button.dataset.numbers);return;}
     if(button.id==='numbersGoPrize'){if(state.numbersRaffle)void openPrize(state.numbersRaffle.id);return;}
