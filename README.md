@@ -120,3 +120,13 @@ La página principal redirige a [la experiencia pública unificada](https://el-t
 - El sistema de compilación verifica pruebas V11-V14 y publica una lista blanca de archivos estáticos; nunca incluye SQL ni credenciales privadas.
 
 [Arquitectura V14 y hoja de ruta V15-V18](docs/V14_PORTADA_PUBLICA_Y_PROXIMOS_PASOS.md).
+
+## V17 — vista previa privada de un sorteo real
+
+En el administrador, los botones **Vista cliente** (Inicio o Mis sorteos) abren `/admin/vista-previa.html?rifa=UUID`. Esta página consulta los datos de la campaña ya guardada, la ficha del premio y sus fotografías privadas mediante sesión Supabase Auth, rol de personal autorizado, RLS y URL temporales (120 s). Permite seleccionar números de ejemplo sin registrar reservas ni pedidos.
+
+- [Guía y arquitectura de seguridad V17](docs/V17_VISTA_PRIVADA_CLIENTE.md)
+- [Código de vista previa](admin/vista-previa.mjs)
+- [Pruebas automáticas V17](tests/test_v17_private_preview.mjs)
+
+Esta previsualización **no es una publicación pública**. Los borradores continúan ocultos para visitantes y se mantienen desactivados cobros, Wompi y emisión real de boletas.
