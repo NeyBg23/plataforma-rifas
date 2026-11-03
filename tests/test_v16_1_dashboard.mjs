@@ -27,7 +27,7 @@ test('V16.1: no habilita venta ni altera estados',()=>{
   assert.ok(segment.includes("state.raffles"));
   assert.doesNotMatch(segment,/\.insert\(|\.update\(|\.rpc\(|\bfetch\(/);
   assert.match(html,/Los documentos y la revisión no habilitan ventas/);
-  assert.match(html,/Panel de gestión · V16\.1 Express/);
+  assert.match(html,/Panel de gestión · (?:V16\.1 Express|V17)/);
 });
 
 test('V16.1: sigue siendo responsive, sin navegación redundante',()=>{
