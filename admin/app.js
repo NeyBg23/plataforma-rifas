@@ -177,7 +177,7 @@
     window.scrollTo({top:0,behavior:'instant'});
   }
   function clearForm(){
-    forms.raffle.reset();state.editing=null;$('formTitle').textContent='Crear una rifa.';setStep(1);
+    forms.raffle.reset();state.editing=null;$('formTitle').textContent='Crear sorteo.';setStep(1);
   }
   function startEdit(id){
     if(!canWrite())return;
@@ -190,16 +190,17 @@
       const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
       forms.raffle.elements.draw_at.value=local;
     }
-    $('formTitle').textContent='Editar borrador.';setStep(1);showPanel('create');
+    $('formTitle').textContent='Editar sorteo.';setStep(1);showPanel('create');
   }
-  function setStep(s){
-    state.step=Math.max(1,Math.min(3,s));
-    document.querySelectorAll('[data-step-panel]').forEach(p=>p.hidden=Number(p.dataset.stepPanel)!==state.step);
-    document.querySelectorAll('[data-step]').forEach(button=>button.classList.toggle('active',Number(button.dataset.step)===state.step));
-    $('wizardBack').hidden=state.step===1;
-    $('wizardNext').hidden=state.step===3;
-    $('saveRaffle').hidden=state.step!==3;
-    if(state.step===3)renderPreview();
+  // V16 Express: todos los datos esenciales en una sola pantalla.
+  // Conserva los controles de validación y el guardado como borrador.
+  function setStep(_unused){
+    state.step=1;
+    document.querySelectorAll('[data-step-panel]').forEach(p=>p.hidden=p.dataset.stepPanel==='3');
+    document.querySelectorAll('[data-step]').forEach(button=>button.hidden=true);
+    $('wizardBack').hidden=true;
+    $('wizardNext').hidden=true;
+    $('saveRaffle').hidden=false;
   }
   function validateStep(s){
     const panel=document.querySelector(`[data-step-panel="${s}"]`);
@@ -237,9 +238,20 @@
       let req;
       if(state.editing) req=state.client.from('ets_raffles').update(payload).eq('id',state.editing).select('id').single();
       else req=state.client.from('ets_raffles').insert({...payload,created_by:state.user.id,state:'draft'}).select('id').single();
-      const {error}=await req;
+      const {data,error}=await req;
       if(error)throw error;
-      await loadData();state.editing=null;showPanel('raffles');note('Borrador guardado en la base de datos. No está publicado.');
+      const createdId=data?.id;
+      const savedTitle=payload.title;
+      await loadData();state.editing=null;showPanel('raffles');
+      const banner=$('quickSuccess');
+      if(banner&&createdId){
+        $('quickSuccessTitle').textContent=savedTitle;
+        banner.querySelector('[data-prize]').dataset.prize=createdId;
+        banner.querySelector('[data-dossier]').dataset.dossier=createdId;
+        banner.querySelector('[data-numbers]').dataset.numbers=createdId;
+        banner.hidden=false;
+      }
+      note('Sorteo guardado como borrador. Puedes añadir fotos y completar su expediente cuando quieras. Sin publicación ni ventas.');
     }catch(err){note('No fue posible guardar: '+(err.message||'error desconocido'),true);}
     finally{state.busy=false;$('saveRaffle').disabled=false;}
   }
