@@ -1,11 +1,11 @@
 {
   "name": "el-toque-de-la-suerte",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "private": true,
-  "description": "El toque de la suerte! · expediente privado de campañas, revisión y documentos sin ventas.",
+  "description": "El toque de la suerte! · creación de sorteos en una sola pantalla, borradores privados y controles de autorización.",
   "scripts": {
     "build": "npm test && node scripts/build-site.mjs",
-    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs tests/test_v14_public.mjs tests/test_v15_domain.mjs"
+    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs tests/test_v14_public.mjs tests/test_v15_domain.mjs tests/test_v16_express.mjs"
   },
   "engines": {
     "node": ">=20"
