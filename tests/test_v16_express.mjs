@@ -29,7 +29,7 @@ test('V16: guardar permanece en estado borrador y no autoriza venta',()=>{
   assert.match(js,/created_by:state\.user\.id,state:'draft'/);
   assert.doesNotMatch(js,/\.insert\([^\n]*state:'published'/);
   assert.match(rls,/state='draft' and authorization_verified=false/);
-  assert.match(rls,/state='published' and authorization_verified = true/);
+  assert.match(rls,/state\s*=\s*'published'\s+and\s+authorization_verified\s*=\s*true/);
   assert.match(html,/Guardar sorteo en borrador/);
 });
 
