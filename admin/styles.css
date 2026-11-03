@@ -106,3 +106,26 @@
 .quick-success-actions{display:flex;flex-wrap:wrap;gap:8px}
 .quick-success .mini{white-space:nowrap}
 @media(max-width:620px){#raffleForm .form-grid{grid-template-columns:minmax(0,1fr)}#raffleForm .form-grid .wide{grid-column:auto}#raffleForm .form-actions{flex-direction:column;align-items:stretch}#raffleForm #saveRaffle{width:100%;order:-1}.quick-success{padding:16px}.quick-success-actions{width:100%}.quick-success-actions .mini{flex:1 1 45%}}
+
+
+/* V16.1 DASHBOARD — retomar un sorteo sin trámites repetidos. */
+.dashboard-guide{padding:clamp(18px,2.7vw,28px)}
+.dashboard-guide-header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap}
+.dashboard-guide-header h2{font-size:clamp(23px,2.7vw,30px);letter-spacing:-.035em;margin:5px 0 6px}
+.dashboard-guide-header p{font-size:14px;line-height:1.5}
+.dashboard-guide-header .pill{font-size:12px}
+.dashboard-resume{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:17px 19px;border:1px solid var(--line);border-radius:19px;background:var(--raised);margin-bottom:25px}
+.dashboard-resume-name{display:flex;align-items:center;gap:13px;min-width:0}
+.dashboard-resume-name .dashboard-icon{font-size:23px;color:var(--orange);background:var(--card);height:47px;width:47px;display:grid;place-items:center;border-radius:14px}
+.dashboard-resume-name small{color:var(--orange);font-size:10px;letter-spacing:.1em;font-weight:800;display:block}
+.dashboard-resume-name strong{font-size:16px;line-height:1.4;display:block;overflow-wrap:anywhere}
+.dashboard-resume-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.dashboard-resume-actions .btn{font-size:12px;min-height:42px;padding:10px 13px}
+.dashboard-simple-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dashboard-simple-steps>div{padding:19px;background:var(--raised);border-radius:18px;min-height:135px}
+.dashboard-simple-steps b{display:block;font-size:13px;color:var(--orange);margin-bottom:9px}
+.dashboard-simple-steps strong{display:block;font-size:15px;margin-bottom:5px}
+.dashboard-simple-steps p{font-size:13px;line-height:1.5}
+.dashboard-compliance{font-size:12px;line-height:1.65;border-top:1px solid var(--line);padding-top:15px;margin-top:18px}
+.dashboard-compliance span{color:var(--orange)}
+@media(max-width:760px){.dashboard-simple-steps{grid-template-columns:1fr}.dashboard-simple-steps>div{min-height:auto;padding:14px}.dashboard-resume{align-items:stretch}.dashboard-resume-actions{width:100%}.dashboard-resume-actions .btn{flex:1 1 42%}}
