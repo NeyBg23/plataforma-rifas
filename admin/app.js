@@ -113,6 +113,7 @@
     $('dashboardPrize').dataset.prize=raffle.id;
     $('dashboardDossier').dataset.dossier=raffle.id;
     $('dashboardNumbers').dataset.numbers=raffle.id;
+    $('dashboardPreview').dataset.preview=raffle.id;
     $('dashboardPrize').textContent=raffle.state==='draft'&&canWrite()?'Añadir fotos / premio ↗':'Consultar premio ↗';
   }
   function el(tag,attrs={},value){
@@ -139,6 +140,7 @@
       const actions=el('td');
       actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'▤ Expediente'));
+      actions.append(el('button',{type:'button',class:'mini',dataset:{preview:r.id}},'✦ Vista cliente'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{numbers:r.id}},'▦ Números'));
       if(canWrite()&&r.state==='draft'){
         actions.append(el('button',{type:'button',class:'mini',dataset:{edit:r.id}},'Editar'));
@@ -272,6 +274,7 @@
         banner.querySelector('[data-prize]').dataset.prize=createdId;
         banner.querySelector('[data-dossier]').dataset.dossier=createdId;
         banner.querySelector('[data-numbers]').dataset.numbers=createdId;
+        banner.querySelector('[data-preview]').dataset.preview=createdId;
         banner.hidden=false;
       }
       note('Sorteo guardado como borrador. Puedes añadir fotos y completar su expediente cuando quieras. Sin publicación ni ventas.');
@@ -601,6 +604,10 @@
     const button=event.target.closest('button');if(!button)return;
     if(button.id==='themeToggle'){setTheme(document.body.dataset.theme==='dark'?'light':'dark');return;}
     if(button.dataset.view){if(button.dataset.view==='create'){state.editing=null;clearForm();}showPanel(button.dataset.view);return;}
+    if(button.dataset.preview){
+      if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(button.dataset.preview)) location.assign('vista-previa.html?rifa='+encodeURIComponent(button.dataset.preview));
+      return;
+    }
     if(button.dataset.dossier){
       if(/^[0-9a-f-]{36}$/i.test(button.dataset.dossier))location.assign('expediente.html?rifa='+encodeURIComponent(button.dataset.dossier));
       return;
