@@ -91,6 +91,29 @@
     $('metricTotal').textContent=integer(state.raffles.length);
     $('metricDraft').textContent=integer(state.raffles.filter(r=>r.state==='draft').length);
     $('metricReview').textContent=integer(state.raffles.filter(r=>r.state==='in_review'||r.state==='awaiting_authorization').length);
+
+    // V16.1: retomar una campaña sin repetir el formulario.
+    // Solo muestra accesos a módulos ya protegidos por Auth + RLS.
+    const raffle=state.raffles.find(r=>r.state==='draft')||state.raffles[0];
+    const resume=$('dashboardResume');
+    if(!resume)return;
+    resume.hidden=!raffle;
+    const summary=$('dashboardLeadSummary');
+    const status=$('dashboardLeadStatus');
+    if(!raffle){
+      summary.textContent='Todavía no tienes sorteos. Crea el primero con los datos básicos.';
+      status.textContent='Sin sorteos';
+      return;
+    }
+    $('dashboardLeadName').textContent=raffle.title;
+    status.textContent=labels[raffle.state]||'En preparación';
+    summary.textContent=raffle.state==='draft'
+      ? 'Continúa preparando el premio y su expediente. Puedes guardar los datos por partes.'
+      : 'Puedes consultar su información y seguimiento. Los cambios requieren el estado correspondiente.';
+    $('dashboardPrize').dataset.prize=raffle.id;
+    $('dashboardDossier').dataset.dossier=raffle.id;
+    $('dashboardNumbers').dataset.numbers=raffle.id;
+    $('dashboardPrize').textContent=raffle.state==='draft'&&canWrite()?'Añadir fotos / premio ↗':'Consultar premio ↗';
   }
   function el(tag,attrs={},value){
     const node=document.createElement(tag);
