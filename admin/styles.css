@@ -88,3 +88,21 @@
 
 .number-heading-actions{display:flex;gap:6px;flex-wrap:wrap}
 @media(max-width:720px){.number-heading-actions{width:100%}.number-heading-actions .btn{flex:1}}
+
+/* V16 EXPRESS — creación de sorteos simple, legible y adaptable. */
+#raffleForm .wizard-tabs[hidden], #raffleForm [hidden], #quickSuccess[hidden]{display:none!important}
+#raffleForm [data-step-panel="1"],#raffleForm [data-step-panel="2"]{display:block}
+#raffleForm [data-step-panel="2"]{margin-top:26px;border-top:1px solid var(--line);padding-top:23px}
+#raffleForm .wizard-panel>h2{font-size:clamp(19px,2.2vw,25px);letter-spacing:-.035em;margin-bottom:16px}
+#raffleForm .form-grid{gap:15px}
+#raffleForm label{font-size:14px;line-height:1.5}
+#raffleForm input,#raffleForm select,#raffleForm textarea{font-size:16px;min-height:46px}
+#raffleForm textarea{min-height:92px}
+#raffleForm .form-actions{border-top:1px solid var(--line);padding-top:20px;margin-top:24px;align-items:center}
+#raffleForm #saveRaffle{min-height:46px}
+.quick-success{background:var(--raised);border:1px solid var(--line);border-left:3px solid var(--orange);padding:18px 20px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;gap:18px;margin:12px 0 18px;flex-wrap:wrap}
+.quick-success strong{display:block;font-size:16px;margin-bottom:6px}
+.quick-success p{margin:0;font-size:13px;line-height:1.55;color:var(--muted);max-width:560px}
+.quick-success-actions{display:flex;flex-wrap:wrap;gap:8px}
+.quick-success .mini{white-space:nowrap}
+@media(max-width:620px){#raffleForm .form-grid{grid-template-columns:minmax(0,1fr)}#raffleForm .form-grid .wide{grid-column:auto}#raffleForm .form-actions{flex-direction:column;align-items:stretch}#raffleForm #saveRaffle{width:100%;order:-1}.quick-success{padding:16px}.quick-success-actions{width:100%}.quick-success-actions .mini{flex:1 1 45%}}
