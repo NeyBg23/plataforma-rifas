@@ -1,11 +1,11 @@
 {
   "name": "el-toque-de-la-suerte",
-  "version": "0.18.1",
+  "version": "0.18.2",
   "private": true,
-  "description": "El toque de la suerte! · laboratorio web de pedidos exclusivamente simulados; sin API comercial.",
+  "description": "El toque de la suerte! · laboratorio de pedidos autenticados, aislado de ventas y pagos.",
   "scripts": {
     "build": "npm test && node scripts/build-site.mjs",
-    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs tests/test_v14_public.mjs tests/test_v15_domain.mjs tests/test_v16_express.mjs tests/test_v16_1_dashboard.mjs tests/test_v17_private_preview.mjs tests/test_v18_1_domain.mjs"
+    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs tests/test_v14_public.mjs tests/test_v15_domain.mjs tests/test_v16_express.mjs tests/test_v16_1_dashboard.mjs tests/test_v17_private_preview.mjs tests/test_v18_1_domain.mjs tests/test_v18_2_server.mjs"
   },
   "engines": {
     "node": ">=20"
