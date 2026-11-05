@@ -42,6 +42,7 @@ const allowed = [
   'laboratorio/pedidos-demo.css',
   'laboratorio/pedidos-demo.mjs',
   'laboratorio/pedido-demo-domain.mjs',
+  'laboratorio/pago-simulado-domain.mjs',
   'laboratorio/index.html',
   'laboratorio/styles.css',
   'laboratorio/app.mjs'

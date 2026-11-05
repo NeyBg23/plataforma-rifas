@@ -3,7 +3,7 @@ import {
   isUuid,
   normalizeRequest,
   numbersInRange,
-} from '../supabase/functions/ets-orders-lab/validation.mjs';
+} from '../admin/lab-validation.mjs';
 
 const ENVIRONMENT = 'simulation';
 const CURRENCY = 'COP';
