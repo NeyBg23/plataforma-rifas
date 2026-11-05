@@ -91,7 +91,7 @@ Deno.serve(async req=>{
      from ets_order_lab.place_demo_order(
       ${input.raffle_id}::uuid,
       ${input.request_id}::uuid,
-      ${db.array(input.numbers,'int4')},
+      ${input.numbers}::integer[],
       ${LAB_TTL_SECONDS}
      )`;
    const row=response[0];
@@ -115,7 +115,8 @@ Deno.serve(async req=>{
  }catch(err){
   if(err instanceof ValidationError)return respond({error:err.message},422,origin);
   // No devolver nombres de tablas, parámetros, secretos ni SQL al navegador.
-  console.error('ets-orders-lab request failed',err instanceof Error?err.name:'unknown');
+  const sqlState=typeof err?.code==='string'&&/^[A-Z0-9]{5}$/.test(err.code)?err.code:'unspecified';
+  console.error('ets-orders-lab request failed',{type:err instanceof Error?err.name:'unknown',sqlState});
   return respond({error:'No fue posible completar la prueba. Intenta nuevamente.'},500,origin);
  }
 });
