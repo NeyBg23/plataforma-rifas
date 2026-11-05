@@ -83,7 +83,7 @@ test('V18.2: cliente solo usa credenciales publicables y JWT de sesión',()=>{
 test('V18.2: interfaz identifica que no son compras',()=>{
  assert.match(html,/LABORATORIO PRIVADO/);
  assert.match(html,/NO SE VENDEN NÚMEROS/);
- assert.match(html,/no realiza cobros|no se procesan pagos|no realiza cobros con Wompi/i);
+ assert.match(html,/(?:ni realiza cobros con Wompi|NO SE PROCESAN PAGOS)/i);
  assert.match(html,/id="create-order"[^>]*disabled/);
  assert.ok(serverRules.normalizeRequest({action:'list',raffle_id:uuid}).action==='list');
  assert.equal(serverRules.MAX_LAB_NUMBERS,MAX_LAB_NUMBERS);
