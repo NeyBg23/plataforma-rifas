@@ -49,6 +49,7 @@ function updateSelection(){
   const chosen=[...state.selected].sort((a,b)=>a-b);
   setText('selected-numbers',chosen.length?chosen.map(n=>formatNumber(n,state.raffle.total_numbers)).join(' · '):'Ningún número seleccionado');
   setText('selected-total',formatCOP(chosen.length*state.raffle.ticket_price_cop));
+  $('try-lab-order').disabled=!chosen.length;
 }
 function renderNumbers(){
   const {total_numbers}=state.raffle;
@@ -74,6 +75,15 @@ function renderNumbers(){
   }
   $('number-grid').replaceChildren(fragment);updateSelection();
 }
+$('try-lab-order').addEventListener('click',()=>{
+  if(!state.raffle||!state.selected.size)return;
+  // Se envían solo parámetros ilustrativos. No representa pedido ni autorización.
+  const url=new URL('../laboratorio/pedidos-demo.html',location.href);
+  url.searchParams.set('total',String(state.raffle.total_numbers));
+  url.searchParams.set('price',String(state.raffle.ticket_price_cop));
+  url.searchParams.set('numbers',[...state.selected].sort((a,b)=>a-b).join(','));
+  location.assign(url.href);
+});
 $('prev-page').addEventListener('click',()=>{if(state.page>0){state.page--;renderNumbers();}});
 $('next-page').addEventListener('click',()=>{if(state.raffle&&state.page+1<Math.ceil(state.raffle.total_numbers/state.pageSize)){state.page++;renderNumbers();}});
 
