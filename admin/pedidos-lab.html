@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>Pedidos de laboratorio V18.2 | El toque de la suerte!</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="pedidos-lab.css?v=18.2">
+</head>
+<body data-theme="dark">
+<div class="dev-banner">LABORATORIO PRIVADO · NO SE VENDEN NÚMEROS NI SE PROCESAN PAGOS</div>
+<header class="topbar"><a class="identity" href="./"><span class="mark">✦</span><span><strong>El toque de la suerte!</strong><small>Pedidos de prueba · V18.2</small></span></a>
+<div class="header-actions"><button id="theme-toggle" type="button">☀ Tema claro</button><a href="./">← Administrador</a></div></header>
+<main>
+<div class="intro"><div><span class="eyebrow">LABORATORIO AUTENTICADO</span><h1>Pedidos bajo control.</h1><p>Prueba una solicitud completa y observa qué números retiene el servidor. Máximo cinco números y dos minutos de retención.</p></div>
+<span class="tag">Sin dinero real</span></div>
+<div class="warning">Este es un entorno exclusivamente técnico. No genera boletas, no activa rifas ni realiza cobros con Wompi.</div>
+<section id="loading" class="state" aria-live="polite">Verificando sesión, permisos y conexión al laboratorio…</section>
+<section id="blocked" class="state" role="alert" hidden><strong>No se puede abrir el laboratorio.</strong><p id="blocked-message"></p><a href="./">Volver al administrador</a></section>
+<section id="workspace" hidden>
+<div class="headline"><div><span class="eyebrow">SORTEO DE PRUEBA</span><h2 id="raffle-title">—</h2><p id="raffle-subtitle"></p></div><button id="refresh" type="button" class="text-button">↻ Actualizar pedidos</button></div>
+<div id="status" class="status" aria-live="polite">Consultando servidor…</div>
+<div class="layout">
+<section class="surface"><div class="section-head"><div><span class="eyebrow">01 · SELECCIÓN</span><h3>Escoge tus números</h3><p>La base de datos confirma si la selección está libre en el laboratorio.</p></div></div>
+<div class="legend"><span><i class="dot" aria-hidden="true"></i> Sin retención detectada</span><span><i class="dot held" aria-hidden="true"></i> Retenido en laboratorio</span><span><i class="dot selected" aria-hidden="true"></i> Seleccionado</span></div>
+<div id="number-grid" class="number-grid" aria-label="Números de laboratorio"></div>
+<div class="pager"><button id="previous" type="button">← Anterior</button><span id="pagination">—</span><button id="next" type="button">Siguiente →</button></div>
+<div class="choice"><div><small>TU SELECCIÓN DE PRUEBA</small><strong id="selected-list">Ningún número seleccionado</strong><span id="selected-count">0 de 5</span></div><div class="choice-value"><small>Total ilustrativo</small><strong id="selected-total">$ 0</strong></div></div>
+<button class="primary" id="create-order" type="button" disabled>Registrar pedido de laboratorio</button>
+<p class="hint">Ningún número es reservado para clientes. Si otro pedido de prueba ganó la retención, el servidor devolverá un conflicto sin registrar una selección parcial.</p>
+</section>
+<aside class="surface"><span class="eyebrow">02 · TRAZABILIDAD</span><h3>Solicitudes registradas</h3><p>Últimas 40 solicitudes del sorteo en la base de datos de laboratorio.</p><div id="orders" class="orders"><p class="empty">Todavía no hay solicitudes.</p></div>
+<button id="expire-orders" type="button" class="secondary" hidden>Revisar vencimientos</button>
+<p class="hint">Las retenciones duran 120 segundos. Los registros históricos no son boletas ni pagos.</p></aside>
+</div>
+</section>
+<footer>V18.2 · Operaciones exclusivamente de prueba · El inventario comercial y Wompi permanecen desactivados.</footer>
+</main>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script type="module" src="pedidos-lab.mjs?v=18.2"></script>
+</body></html>
