@@ -34,6 +34,10 @@ const allowed = [
   'experiencia/assets/premio-1.svg',
   'experiencia/assets/premio-2.svg',
   'experiencia/assets/premio-3.svg',
+  'laboratorio/pedidos-demo.html',
+  'laboratorio/pedidos-demo.css',
+  'laboratorio/pedidos-demo.mjs',
+  'laboratorio/pedido-demo-domain.mjs',
   'laboratorio/index.html',
   'laboratorio/styles.css',
   'laboratorio/app.mjs'
