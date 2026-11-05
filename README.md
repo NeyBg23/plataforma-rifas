@@ -130,3 +130,15 @@ En el administrador, los botones **Vista cliente** (Inicio o Mis sorteos) abren 
 - [Pruebas automáticas V17](tests/test_v17_private_preview.mjs)
 
 Esta previsualización **no es una publicación pública**. Los borradores continúan ocultos para visitantes y se mantienen desactivados cobros, Wompi y emisión real de boletas.
+
+## V18.1 — recorrer un pedido de prueba desde la vista privada
+
+En `/admin/vista-previa.html?rifa=...`, selecciona entre uno y cinco números y pulsa **Probar pedido de laboratorio**. El navegador abrirá `/laboratorio/pedidos-demo.html` con esos números preseleccionados.
+
+- El laboratorio solo guarda solicitudes **en la memoria de esa pestaña**. Simula retención de 120 segundos, conflictos, idempotencia en el módulo de dominio y liberación. Nunca consulta Supabase ni toca `ets_number_allocations`.
+- El límite de cinco es únicamente para esta prueba.
+- No hay pagos, Wompi activo, identificación del comprador, boletas ni ventas.
+- [Documentación y alcance V18.1](docs/V18_1_LABORATORIO_ONLINE.md).
+- [Pruebas de dominio](tests/test_v18_1_domain.mjs).
+
+**API persistente V18.2 pendiente:** no desplegamos ninguna API con permisos privilegiados. Se necesitan validaciones independientes de roles, concurrencia multiusuario, expiración y aislamiento antes de activar pedidos sobre PostgreSQL.
