@@ -96,3 +96,10 @@ test('V18.2: el administrador puede abrir laboratorio solo desde una rifa en bor
  assert.match(adminApp,/if\(button\.dataset\.lab\)/);
  assert.match(adminApp,/pedidos-lab\.html\?rifa=/);
 });
+
+test('V18.2: explicit integer[] SQL array typing for 5-number transactions',()=>{
+ assert.match(edge,/\$\{input\.numbers\}::integer\[\]/);
+ assert.doesNotMatch(edge,/db\.array\(input\.numbers/);
+ assert.match(edge,/sqlState/);
+ assert.doesNotMatch(edge,/console\.error\([^\n]*err\.message/);
+});
