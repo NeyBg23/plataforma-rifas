@@ -141,6 +141,7 @@
       actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'▤ Expediente'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{preview:r.id}},'✦ Vista cliente'));
+      if(r.state==='draft')actions.append(el('button',{type:'button',class:'mini',dataset:{lab:r.id}},'Pedidos de prueba'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{numbers:r.id}},'▦ Números'));
       if(canWrite()&&r.state==='draft'){
         actions.append(el('button',{type:'button',class:'mini',dataset:{edit:r.id}},'Editar'));
@@ -604,6 +605,10 @@
     const button=event.target.closest('button');if(!button)return;
     if(button.id==='themeToggle'){setTheme(document.body.dataset.theme==='dark'?'light':'dark');return;}
     if(button.dataset.view){if(button.dataset.view==='create'){state.editing=null;clearForm();}showPanel(button.dataset.view);return;}
+    if(button.dataset.lab){
+      if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(button.dataset.lab))location.assign('pedidos-lab.html?rifa='+encodeURIComponent(button.dataset.lab));
+      return;
+    }
     if(button.dataset.preview){
       if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(button.dataset.preview)) location.assign('vista-previa.html?rifa='+encodeURIComponent(button.dataset.preview));
       return;
