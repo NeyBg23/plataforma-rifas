@@ -1,7 +1,7 @@
 // V18.2 — cliente autenticado para PEDIDOS DE LABORATORIO.
 // Solo se comunica con Supabase Edge Function tras comprobar usuario y rol.
 // No compra, no cobra, no emite boletas ni modifica inventario comercial.
-import {normalizeRequest,isAllowedDraft,canUseLab,LAB_TTL_SECONDS} from '../supabase/functions/ets-orders-lab/validation.mjs';
+import {normalizeRequest,isAllowedDraft,canUseLab,LAB_TTL_SECONDS} from './lab-validation.mjs';
 const $=id=>document.getElementById(id);
 const cfg=window.ETS_PUBLIC_SUPABASE||{};
 const state={client:null,role:null,raffle:null,page:0,selected:new Set(),orders:[],busy:false,ready:false,requestId:null,fingerprint:null};
