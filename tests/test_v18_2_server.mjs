@@ -88,3 +88,11 @@ test('V18.2: interfaz identifica que no son compras',()=>{
  assert.ok(serverRules.normalizeRequest({action:'list',raffle_id:uuid}).action==='list');
  assert.equal(serverRules.MAX_LAB_NUMBERS,MAX_LAB_NUMBERS);
 });
+
+const adminApp=readFileSync(new URL('../admin/app.js',import.meta.url),'utf8');
+test('V18.2: el administrador puede abrir laboratorio solo desde una rifa en borrador',()=>{
+ assert.match(adminApp,/r\.state==='draft'\)actions\.append/);
+ assert.match(adminApp,/data(?:set)?:\{lab:r\.id\}/);
+ assert.match(adminApp,/if\(button\.dataset\.lab\)/);
+ assert.match(adminApp,/pedidos-lab\.html\?rifa=/);
+});
