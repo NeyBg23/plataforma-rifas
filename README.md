@@ -1,5 +1,7 @@
 # El toque de la suerte! — V9
 
+**Actualización V20**. Las rifas con autorización verificada pueden publicar su ficha en el catálogo. La ficha informativa y los pedidos tienen etapas separadas. [Publicación de fichas](docs/V20_PUBLICACION_DE_FICHAS.md).
+
 **Actualización V19**. El panel permite configurar pagos manuales por QR y llave, registrar la referencia de una transferencia y revisarla para confirmar o liberar números. Incluye un recorrido privado de prueba. La apertura pública conserva los requisitos de publicación y autorización de cada campaña. [Configuración, permisos y pruebas de V19](docs/V19_PAGOS_MANUALES_QR.md).
 
 Plataforma de rifas **en desarrollo** con una experiencia pública de demostración y un administrador conectado a un proyecto independiente de Supabase.

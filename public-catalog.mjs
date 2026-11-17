@@ -1,20 +1,21 @@
-/** Catálogo público V14. Solo consulta columnas públicas, RLS decide qué filas se ven. */
+/** Consulta solo columnas públicas. La base de datos decide qué fichas son visibles. */
 export const PUBLIC_COLUMNS = 'id,title,description,category,ticket_price_cop,total_numbers,draw_at,state';
 export const PUBLIC_LIMIT = 12;
 
 export function catalogUrl(baseUrl) {
   const url = new URL('/rest/v1/ets_raffles', baseUrl);
   url.searchParams.set('select', PUBLIC_COLUMNS);
-  url.searchParams.set('state', 'eq.published');
+  url.searchParams.set('state', 'in.(listed,published)');
   url.searchParams.set('order', 'draw_at.asc');
   url.searchParams.set('limit', String(PUBLIC_LIMIT));
   return url.href;
 }
 
 export function normalizePublicRow(row) {
-  if (!row || row.state !== 'published' || typeof row.id !== 'string' || typeof row.title !== 'string' || !row.title.trim()) return null;
+  if (!row || !['listed','published'].includes(row.state) || typeof row.id !== 'string' || typeof row.title !== 'string' || !row.title.trim()) return null;
   return {
     id: row.id,
+    canOrder: row.state === 'published',
     title: row.title.slice(0, 140),
     description: typeof row.description === 'string' ? row.description.slice(0, 280) : '',
     category: typeof row.category === 'string' ? row.category.slice(0, 60) : '',

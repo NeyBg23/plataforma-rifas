@@ -92,6 +92,15 @@ Deno.serve(async req => {
         return respond({error:'Tu cuenta tiene acceso de consulta.'},403,origin);
       }
     }
+    if (input.action === 'publication_status') {
+      const [row] = await db`select ets_internal.raffle_listing_status(${input.raffle_id}::uuid) as status`;
+      return respond({ok:true,status:row.status},200,origin);
+    }
+    if (input.action === 'publish_listing') {
+      if (role !== 'admin') return respond({error:'La publicación requiere una cuenta de administrador.'},403,origin);
+      const [row] = await db`select ets_internal.publish_raffle_listing(${input.raffle_id}::uuid,${user.id}::uuid) as status`;
+      return respond({ok:true,status:row.status},200,origin);
+    }
     const [raffle] = await db`select id,title,state,authorization_verified,draw_at,ticket_price_cop,total_numbers
       from public.ets_raffles where id=${input.raffle_id}::uuid`;
     if (!raffle) return respond({error:'Sorteo no encontrado.'},404,origin);

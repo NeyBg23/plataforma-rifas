@@ -15,7 +15,7 @@
   const money = amount => new Intl.NumberFormat('es-CO', {style:'currency',currency:'COP',maximumFractionDigits:0}).format(amount||0);
   const integer = amount => new Intl.NumberFormat('es-CO').format(amount||0);
   const dateFormat = date => date ? new Intl.DateTimeFormat('es-CO',{dateStyle:'medium',timeStyle:'short'}).format(new Date(date)) : 'Por definir';
-  const labels={draft:'Borrador',in_review:'En revisión',awaiting_authorization:'Pendiente de autorización',published:'Publicada',closed:'Finalizada',cancelled:'Cancelada'};
+  const labels={draft:'Borrador',in_review:'En revisión',awaiting_authorization:'Pendiente de autorización',listed:'Publicada',published:'Abierta',closed:'Finalizada',cancelled:'Cancelada'};
   const roleLabels={admin:'Administrador',operator:'Operador',auditor:'Auditor'};
   const canWrite = () => ['admin','operator'].includes(state.staff?.role) && Boolean(state.staff?.enabled);
   const canReturnToDraft = raffle => canWrite() && Boolean(raffle) && !raffle.authorization_verified && ['in_review','awaiting_authorization'].includes(raffle.state);
@@ -91,6 +91,9 @@
     $('metricTotal').textContent=integer(state.raffles.length);
     $('metricDraft').textContent=integer(state.raffles.filter(r=>r.state==='draft').length);
     $('metricReview').textContent=integer(state.raffles.filter(r=>r.state==='in_review'||r.state==='awaiting_authorization').length);
+    if ($('metricPublic')) {
+      $('metricPublic').textContent=integer(state.raffles.filter(r=>['listed','published'].includes(r.state)).length);
+    }
 
     // V16.1: retomar una campaña sin repetir el formulario.
     // Solo muestra accesos a módulos ya protegidos por Auth + RLS.
@@ -140,7 +143,7 @@
       const statusCell=el('td');statusCell.append(el('span',{class:'pill'},labels[r.state]||r.state));tr.append(statusCell);
       const actions=el('td');
       actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
-      actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'▤ Expediente'));
+      actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'▤ Expediente y publicación'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{preview:r.id}},'✦ Vista cliente'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{payments:r.id}},'Pagos por QR'));
       if(r.state==='draft')actions.append(el('button',{type:'button',class:'mini',dataset:{lab:r.id}},'Pruebas internas'));
@@ -343,8 +346,9 @@
     if(!raffle)return note('No encontramos esta rifa.',true);
     state.selectedRaffle=raffle;state.prize=null;state.photos=[];
     $('prizeRaffleTitle').textContent=raffle.title;
-    $('prizeSubtitle').textContent='Ficha privada de '+raffle.title+'. Aún no se publica en el catálogo.';
+    $('prizeSubtitle').textContent='Ficha de '+raffle.title+'.';
     forms.prize.reset();forms.photo.reset();
+    updatePrizeKind();
     $('prizeSaveStatus').textContent='Cargando ficha…';
     $('galleryStatus').textContent='Cargando fotografías…';
     $('prizeGallery').replaceChildren();
@@ -354,14 +358,15 @@
   }
   async function refreshPrize(id){
     const [{data:p,error:pErr},{data:images,error:iErr}]=await Promise.all([
-      state.client.from('ets_prizes').select('raffle_id,brand,model,prize_condition,prize_details,estimated_value_cop,includes_text,delivery_notes,updated_at').eq('raffle_id',id).maybeSingle(),
+      state.client.from('ets_prizes').select('raffle_id,brand,model,prize_kind,prize_condition,prize_details,estimated_value_cop,includes_text,delivery_notes,updated_at').eq('raffle_id',id).maybeSingle(),
       state.client.from('ets_prize_images').select('id,raffle_id,storage_path,alt_text,is_cover,sort_order,created_at,uploaded_by').eq('raffle_id',id).order('sort_order',{ascending:true}).order('created_at',{ascending:true}).limit(8)
     ]);
     if(state.selectedRaffle?.id!==id)return;
     if(pErr||iErr){note('No se pudo cargar la ficha del premio: '+(pErr?.message||iErr?.message),true);return;}
     state.prize=p||null;state.photos=images||[];
-    const fields=['brand','model','prize_condition','prize_details','estimated_value_cop','includes_text','delivery_notes'];
+    const fields=['brand','model','prize_kind','prize_condition','prize_details','estimated_value_cop','includes_text','delivery_notes'];
     for(const field of fields)forms.prize.elements[field].value=p?.[field]??(field==='prize_condition'?'new':'');
+    updatePrizeKind();
     $('prizeSaveStatus').textContent=p?.updated_at?'Último guardado: '+dateFormat(p.updated_at):'Todavía no has guardado la ficha';
     await renderPhotos();
   }
@@ -372,7 +377,18 @@
     const rawVal=String(form.get('estimated_value_cop')||'').trim();
     const estimated=rawVal?Number(rawVal):null;
     if(estimated!==null&&(!Number.isSafeInteger(estimated)||estimated<1||estimated>100000000000))return note('El valor estimado no es válido.',true);
-    const payload={brand:String(form.get('brand')||'').trim(),model:String(form.get('model')||'').trim(),prize_condition:String(form.get('prize_condition')||'new'),prize_details:String(form.get('prize_details')||'').trim(),estimated_value_cop:estimated,includes_text:String(form.get('includes_text')||'').trim(),delivery_notes:String(form.get('delivery_notes')||'').trim()};
+    const prizeKind=String(form.get('prize_kind')||'');
+    const isCash=prizeKind==='cash';
+    const payload={
+      prize_kind:prizeKind || null,
+      brand:isCash?'':String(form.get('brand')||'').trim(),
+      model:isCash?'':String(form.get('model')||'').trim(),
+      prize_condition:isCash?'other':String(form.get('prize_condition')||'new'),
+      prize_details:String(form.get('prize_details')||'').trim(),
+      estimated_value_cop:estimated,
+      includes_text:String(form.get('includes_text')||'').trim(),
+      delivery_notes:String(form.get('delivery_notes')||'').trim()
+    };
     if(!forms.prize.checkValidity()){forms.prize.reportValidity();return;}
     state.prizeBusy=true;$('savePrize').disabled=true;
     try{
@@ -386,6 +402,10 @@
       note('Ficha guardada en Supabase. Los cambios están en el historial; no está publicada.');
     }catch(e){note('No pudimos guardar la ficha: '+(e.message||'Error desconocido'),true);}
     finally{state.prizeBusy=false;$('savePrize').disabled=false;}
+  }
+  function updatePrizeKind(){
+    const isCash=forms.prize.elements.prize_kind.value==='cash';
+    forms.prize.querySelectorAll('[data-physical-prize]').forEach(label=>label.hidden=isCash);
   }
   async function renderPhotos(){
     const target=$('prizeGallery');target.replaceChildren();
@@ -647,6 +667,7 @@
   forms.login.addEventListener('submit',event=>{void doLogin(event);});
   forms.raffle.addEventListener('submit',event=>{void saveRaffle(event);});
   forms.prize.addEventListener('submit',event=>{void savePrize(event);});
+  forms.prize.elements.prize_kind.addEventListener('change',updatePrizeKind);
   forms.photo.addEventListener('submit',event=>{void uploadPhoto(event);});
   void init();
 })();

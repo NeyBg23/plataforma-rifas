@@ -18,9 +18,9 @@ test('La portada dirige al recorrido del cliente y evita enlaces a simulaciones'
   assert.doesNotMatch(html,/checkout\.wompi|widget\.wompi/);
   assert.doesNotMatch(html,/service_role|sb_secret_|private_key/i);
 });
-test('El catálogo usa exclusivamente columnas públicas y filtro published',()=>{
+test('El catálogo consulta solo columnas públicas de fichas visibles',()=>{
   const url=new URL(catalogUrl('https://example.supabase.co'));
-  assert.equal(url.searchParams.get('state'),'eq.published');
+  assert.equal(url.searchParams.get('state'),'in.(listed,published)');
   assert.equal(url.searchParams.get('select'),PUBLIC_COLUMNS);
   assert.doesNotMatch(PUBLIC_COLUMNS,/created_by|authorization_verified|payment/);
 });
@@ -30,11 +30,14 @@ test('No muestra borradores si el servidor devuelve filas indebidas', async ()=>
     assert.ok(options.headers.apikey.startsWith('sb_publishable_'));
     return {ok:true,json:async()=>[
       {id:'a',state:'draft',title:'Secreto'},
-      {id:'b',state:'published',title:'Campaña aprobada',description:'Ejemplo',ticket_price_cop:2000,total_numbers:100,draw_at:'2026-12-01T19:00:00Z'}
+      {id:'b',state:'published',title:'Campaña aprobada',description:'Ejemplo',ticket_price_cop:2000,total_numbers:100,draw_at:'2026-12-01T19:00:00Z'},
+      {id:'c',state:'listed',title:'Ficha informativa',description:'Ejemplo',ticket_price_cop:2000,total_numbers:100,draw_at:'2026-12-01T19:00:00Z'}
     ]};
   });
-  assert.equal(result.length,1);
+  assert.equal(result.length,2);
   assert.equal(result[0].title,'Campaña aprobada');
+  assert.equal(result[0].canOrder,true);
+  assert.equal(result[1].canOrder,false);
 });
 test('Una falla de la API no se transforma en campañas inventadas',async()=>{
   await assert.rejects(()=>fetchPublicCatalog({url:'https://sample.supabase.co',publishableKey:'sb_publishable_dummy'},async()=>({ok:false,status:500})),/No se pudo/);

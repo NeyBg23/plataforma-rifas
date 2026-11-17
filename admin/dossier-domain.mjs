@@ -43,7 +43,7 @@ export function dossierChecklist({raffle,dossier,prize,photoCount=0,documents=[]
     {id:'organizer', label:'Datos del organizador', detail:'Nombre y autoridad competente declarados', done:Boolean(dossier && String(dossier.organizer_name||'').trim().length>=3 && String(dossier.competent_authority||'').trim().length>=3)},
     {id:'evidence', label:'Soportes documentales', detail:'Se adjuntó un soporte privado de autorización declarada', done:docs.some(x=>x.document_kind==='authorization_claim')},
     {id:'date', label:'Fecha prevista', detail:'Sorteo o evento previsto registrado', done:Boolean(raffle?.draw_at && !Number.isNaN(Date.parse(raffle.draw_at)))},
-    {id:'legal', label:'Verificación externa', detail:'Requiere comprobación jurídica y habilitación independiente', done:Boolean(raffle?.authorization_verified && raffle?.state==='published')}
+    {id:'legal', label:'Verificación externa', detail:'Comprobación de la autorización para esta rifa', done:Boolean(raffle?.authorization_verified)}
   ];
   // Cumplir documentación NO acredita autorización. No permitir inferencia de publicación.
   return {items, completed:items.filter(x=>x.done).length, total:items.length,

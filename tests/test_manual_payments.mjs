@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeInput,InputError} from '../supabase/functions/ets-manual-payments/validation.mjs';
+import {normalizeInput,InputError,STAFF_ACTIONS} from '../supabase/functions/ets-manual-payments/validation.mjs';
 const raffle = 'c3b1eb27-ade9-434f-ade4-6ce68f84f184';
 const id = 'fa25e7ab-9db3-4bb3-901e-4e7ef9ac4650';
 const valid = {action:'place',raffle_id:raffle,order_id:id,access_token:'a'.repeat(64),numbers:[2,1],customer_name:'Cliente de prueba',customer_contact:'+570000000000'};
@@ -32,4 +32,12 @@ test('La referencia y la página respetan límites explícitos',() => {
   assert.equal(normalizeInput({...valid,action:'report',payment_reference:' REF-123 '}).payment_reference,'REF-123');
   assert.throws(() => normalizeInput({...valid,action:'report',payment_reference:''}),InputError);
   assert.throws(() => normalizeInput({action:'quote',raffle_id:raffle,page:-1}),InputError);
+});
+test('Publicar ficha es una acción privada y no acepta el modo de prueba',()=> {
+  for (const action of ['publication_status','publish_listing']) {
+    assert.ok(STAFF_ACTIONS.has(action));
+    const input = normalizeInput({action,raffle_id:raffle,actor_id:id,authorization_verified:true});
+    assert.deepEqual(input,{action,raffle_id:raffle,is_test:false});
+    assert.throws(()=>normalizeInput({action,raffle_id:raffle,is_test:true}),InputError);
+  }
 });

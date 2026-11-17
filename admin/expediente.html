@@ -10,12 +10,11 @@
   <link rel="stylesheet" href="dossier.css?v=15.0.0"/>
   <script src="config.js?v=15.0.0"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script type="module" src="dossier.mjs?v=15.0.0"></script>
+  <script type="module" src="dossier.mjs?v=20.0.0"></script>
 </head>
 <body data-theme="dark">
-  <div class="development-bar">✦ PLATAFORMA EN DESARROLLO · EXPEDIENTE INTERNO · SIN AUTORIZACIÓN COMERCIAL</div>
   <header class="topbar">
-    <a class="brand" href="./"><span class="brand-glyph">✦</span><span><strong>El toque de la suerte!</strong><small>Centro de campañas · V15</small></span></a>
+    <a class="brand" href="./"><span class="brand-glyph">✦</span><span><strong>El toque de la suerte!</strong><small>Expediente de la rifa</small></span></a>
     <div class="top-actions"><button type="button" class="link-button" id="themeButton">☀ Tema claro</button><a class="link-button" href="./">← Administrador</a></div>
   </header>
   <div id="loading" class="load-shell"><span class="orbit">✦</span><h1>Verificando el expediente…</h1><p>Comprobando tu sesión y los permisos del servidor.</p></div>
@@ -28,6 +27,7 @@
       <div class="sidebar-divider"></div>
       <nav class="aside-nav" aria-label="Secciones del expediente">
         <a href="#resumen"><span>01</span> Resumen y controles</a>
+        <a href="#publicacion">Publicación</a>
         <a href="#datos"><span>02</span> Organizador y autoridad</a>
         <a href="#documentos"><span>03</span> Soportes privados</a>
         <a href="#revision"><span>04</span> Historial de revisión</a>
@@ -38,10 +38,18 @@
     </aside>
     <main class="content">
       <section class="intro" id="resumen">
-        <div><span class="eyebrow">GESTIÓN DE CAMPAÑAS · V15</span><h1>Todo bajo <em>control.</em></h1><p>Organiza la información y prepara cada campaña para revisión externa, sin habilitar ventas.</p></div>
+        <div><span class="eyebrow">GESTIÓN DE RIFAS</span><h1>Expediente de la rifa</h1><p>Consulta la documentación y el estado de publicación.</p></div>
         <span class="status-badge" id="raffleState">Borrador</span>
       </section>
-      <div class="warning" role="note"><strong>Publicación comercial bloqueada.</strong> La carga de soportes y las observaciones no verifican autorizaciones ante autoridades ni permiten emitir boletas o cobrar.</div>
+      <section class="section surface" id="publicacion" aria-labelledby="publicationTitle">
+        <div class="section-heading"><div><h2 id="publicationTitle">Publicación en el catálogo</h2><p>Publica la ficha informativa del sorteo.</p></div></div>
+        <div id="publicationStatus" class="warning" role="status" aria-live="polite">Consultando el estado de publicación…</div>
+        <div class="form-foot">
+          <a id="publicationLink" class="glow-link" href="../#campanas" hidden>Ver catálogo ↗</a>
+          <button type="button" id="publicationRetry" class="link-button" hidden>Consultar de nuevo</button>
+          <button type="button" id="publishRaffle" class="neon-action" disabled>Publicar ficha ↗</button>
+        </div>
+      </section>
       <section class="section" aria-labelledby="checklistTitle">
         <div class="section-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2 id="checklistTitle">Preparación del expediente</h2><p>Indicadores de completitud documental. No representan certificación ni aprobación legal.</p></div><div class="progress-summary"><strong id="doneCount">0 / 7</strong><span>Controles documentales</span></div></div>
         <div class="progress-track" role="progressbar" aria-label="Completitud interna" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0" id="progressTrack"><span id="progressFill"></span></div>
@@ -78,7 +86,7 @@
         </form>
         <div id="reviewList" class="review-list"><div class="empty">No hay observaciones.</div></div>
       </section>
-      <footer class="footnote">© 2026 El toque de la suerte! · Expediente privado en desarrollo · Sin ventas ni boletas reales</footer>
+      <footer class="footnote">© 2026 El toque de la suerte! · Expediente privado</footer>
     </main>
   </div>
   <div id="toast" role="status" aria-live="polite" hidden></div>

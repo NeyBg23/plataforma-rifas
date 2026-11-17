@@ -1,7 +1,8 @@
 export class InputError extends Error {}
 export const MAX_BODY_BYTES = 16384;
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-export const STAFF_ACTIONS = new Set(['admin_get','save_settings','qr_upload','list_orders','review']);
+const PUBLICATION_ACTIONS = new Set(['publication_status','publish_listing']);
+export const STAFF_ACTIONS = new Set(['admin_get','save_settings','qr_upload','list_orders','review',...PUBLICATION_ACTIONS]);
 const ACTIONS = new Set([...STAFF_ACTIONS,'quote','place','status','report']);
 function text(value, min, max, label) {
   if (typeof value !== 'string' || value.trim().length < min || value.trim().length > max) {
@@ -15,6 +16,7 @@ export function normalizeInput(value) {
   }
   if (value.is_test !== undefined && typeof value.is_test !== 'boolean') throw new InputError('Modo inválido.');
   const input = {action:value.action, raffle_id:value.raffle_id, is_test:value.is_test === true};
+  if (PUBLICATION_ACTIONS.has(input.action) && input.is_test) throw new InputError('La publicación se gestiona desde el expediente.');
   if (['quote','list_orders'].includes(input.action)) {
     input.page = value.page ?? 0;
     if (!Number.isSafeInteger(input.page) || input.page < 0 || input.page > 9999) throw new InputError('Página inválida.');

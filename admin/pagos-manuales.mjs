@@ -135,7 +135,11 @@ async function start() {
   $('public-payment').hidden = !published;
   paymentUrl.searchParams.set('modo','prueba');
   $('test-payment').href = paymentUrl.href;
-  $('publication-note').textContent = published ? 'El pago para clientes estará disponible al activar un QR o una llave y mientras el sorteo esté vigente.' : 'Este sorteo está en preparación. Puedes guardar el QR y probar todo el recorrido en privado. El acceso de clientes requiere que el sorteo esté publicado y habilitado.';
+  $('publication-note').textContent = published
+    ? 'El pago para clientes está disponible con el medio de pago activo y una fecha vigente.'
+    : result.raffle.state === 'listed'
+      ? 'La ficha está visible en el catálogo. Los pedidos para esta rifa siguen en la vista privada de prueba.'
+      : 'Puedes configurar el pago y probarlo en privado mientras preparas el sorteo.';
   $('workspace').hidden = false;
   busy(false);
   await refresh();

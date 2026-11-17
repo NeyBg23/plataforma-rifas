@@ -1,14 +1,32 @@
-import { BUCKET, DOCUMENT_KINDS, REVIEW_TYPES, dossierChecklist, dossierEditable, documentPath, isUUID, safeDocumentName } from './dossier-domain.mjs';
+import { BUCKET, DOCUMENT_KINDS, REVIEW_TYPES, dossierChecklist, dossierEditable, documentPath, isUUID, safeDocumentName } from './dossier-domain.mjs?v=20.0.0';
+import { paymentRequest } from '../pagos/api.mjs';
 
-// Este controlador opera exclusivamente con sesión/rol/RLS de Supabase.
-// No incluye ninguna función para verificar autorizaciones, publicar, cobrar ni emitir boletas.
+// Las escrituras del expediente usan RLS. La publicación se comprueba en el servidor.
 const $ = id => document.getElementById(id);
 const cfg = window.ETS_PUBLIC_SUPABASE || {};
 const qs = new URLSearchParams(location.search);
 const raffleId = qs.get('rifa');
 const state = { client:null, user:null, staff:null, raffle:null, dossier:null, prize:null, photos:[], docs:[], reviews:[], busy:false };
 const date = val => val ? new Intl.DateTimeFormat('es-CO',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Bogota'}).format(new Date(val)) : 'Sin fecha';
-const statusLabels = {draft:'Borrador',in_review:'En revisión',awaiting_authorization:'Pendiente de autorización',published:'Publicada',closed:'Cerrada',cancelled:'Cancelada'};
+const statusLabels = {draft:'Borrador',in_review:'En revisión',awaiting_authorization:'Pendiente de autorización',listed:'Publicada',published:'Abierta',closed:'Cerrada',cancelled:'Cancelada'};
+const publicationMessages = {
+  prize_kind:'Selecciona el tipo de premio en «Premio y fotos».',
+  cash_prize:'Las rifas con premio en efectivo quedan fuera de la publicación.',
+  used_prize:'Para publicar la rifa, el premio en especie debe ser nuevo.',
+  prize_details:'Completa la descripción y la entrega en «Premio y fotos».',
+  draw_date:'Registra una fecha de sorteo futura.',
+  photos:'Añade al menos una fotografía del premio.',
+  dossier:'Completa el organizador, la autoridad y el número del acto.',
+  evidence:'Adjunta el documento oficial de autorización de esta rifa.',
+  review:'Envía la rifa a revisión desde «Mis sorteos».',
+  verification:'Está pendiente la verificación de la autorización.',
+  ready:'La autorización está verificada. Puedes publicar la ficha.',
+  listed:'La ficha ya está en el catálogo.',
+  published:'La rifa ya está abierta al público.',
+  inactive:'La rifa ya está cerrada.',
+  not_found:'No encontramos esta rifa.'
+};
+let publicationStatus = '';
 let toastHandle;
 function showMessage(text,error=false) {
   const box=$('toast');box.textContent=text;box.hidden=false;box.classList.toggle('error',error);
@@ -46,6 +64,50 @@ function render(){const r=state.raffle;$('loading').hidden=true;$('blocked').hid
   $('raffleState').textContent=statusLabels[r.state]||r.state;
   setForm();renderChecklist();renderDocs();renderReviews();disableWrites();
 }
+function showPublication(status, message) {
+  publicationStatus = status;
+  const visible = ['listed','published'].includes(status);
+  const canPublish = status === 'ready' && state.staff?.role === 'admin';
+  $('publicationStatus').textContent = message || (status === 'ready' && !canPublish
+    ? 'La autorización está verificada. Un administrador puede publicar la ficha.'
+    : publicationMessages[status]) || 'No pudimos consultar el estado de publicación.';
+  $('publishRaffle').disabled = !canPublish;
+  $('publishRaffle').hidden = visible;
+  $('publicationLink').hidden = !visible;
+  $('publicationRetry').hidden = status !== 'error';
+}
+function publicationRequest(action) {
+  return paymentRequest({action,raffle_id:raffleId},state.client);
+}
+async function readPublication() {
+  showPublication('loading','Consultando el estado de publicación…');
+  try {
+    const result = await publicationRequest('publication_status');
+    showPublication(result.status);
+  } catch {
+    showPublication('error');
+  }
+}
+$('publicationRetry').addEventListener('click',readPublication);
+$('publishRaffle').addEventListener('click',async () => {
+  if (publicationStatus !== 'ready' || state.busy || state.staff?.role !== 'admin') return;
+  if (!window.confirm('¿Publicar la ficha de «'+state.raffle.title+'» en el catálogo?')) return;
+  state.busy = true;
+  showPublication('loading','Publicando la ficha…');
+  try {
+    const result = await publicationRequest('publish_listing');
+    if (result.status === 'listed') {
+      await readData();
+      showMessage('La ficha ya está visible en el catálogo.');
+    } else {
+      showPublication(result.status);
+    }
+  } catch {
+    showPublication('error','No pudimos confirmar el resultado. Consulta el estado antes de volver a publicar.');
+  } finally {
+    state.busy = false;
+  }
+});
 async function readData(){const db=state.client;
   const [raffle,dossier,prize,photos,docs,reviews]=await Promise.all([
     db.from('ets_raffles').select('id,title,state,authorization_verified,draw_at,ticket_price_cop,total_numbers').eq('id',raffleId).maybeSingle(),
@@ -61,6 +123,7 @@ async function readData(){const db=state.client;
   state.raffle=raffle.data;state.dossier=dossier.data;state.prize=prize.data;
   state.photos=photos.data||[];state.docs=docs.data||[];state.reviews=reviews.data||[];
   render();
+  await readPublication();
 }
 async function init(){if(!isUUID(raffleId)){block('Abre un expediente desde el listado de Mis rifas.');return;}
   if(!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(cfg.url||'')||!/^sb_publishable_[A-Za-z0-9_-]{12,}$/.test(cfg.publishableKey||'')){block('Conexión de Supabase no configurada.');return;}
