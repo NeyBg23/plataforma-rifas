@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><title>Tu pedido | El toque de la suerte!</title>
+  <link rel="icon" href="../favicon.svg"><link rel="stylesheet" href="../admin/styles.css?v=19"><link rel="stylesheet" href="../pagos/manual.css?v=19">
+</head>
+<body data-theme="dark">
+  <div class="payment-test" id="test-banner" hidden>RECORRIDO DE PRUEBA · USA DATOS FICTICIOS · SIN TRANSFERIR DINERO</div>
+  <header class="sitehead"><a href="../" class="brand"><span class="star">✦</span><span><strong>El toque de la suerte!</strong><small>Tu pedido por transferencia</small></span></a><button class="btn text small" type="button" id="theme-toggle">☀ Tema claro</button></header>
+  <main class="payment-main">
+    <span class="eyebrow">ELIGE · TRANSFIERE · CONFIRMA</span><h1 id="raffle-title">Prepara tu pedido.</h1>
+    <p id="status" class="notice" role="status" aria-live="polite">Comprobando el sorteo…</p>
+    <button id="retry-loading" class="btn primary" type="button" hidden>Volver a conectar</button>
+    <section id="selection" hidden>
+      <div class="payment-layout">
+        <article class="frame"><h2><span class="payment-step">1</span>Elige tus números</h2><p id="price"></p>
+          <div class="payment-numbers" id="number-grid" aria-label="Números del sorteo"></div>
+          <div class="payment-pager"><button type="button" class="btn text" id="previous">← Anterior</button><span id="pagination"></span><button type="button" class="btn text" id="next">Siguiente →</button></div>
+        </article>
+        <article class="frame"><h2><span class="payment-step">2</span>Revisa tu pedido</h2><p>Selecciona hasta cinco números por pedido. El servidor comprobará la disponibilidad al continuar.</p>
+          <div class="payment-summary"><small>Números elegidos</small><strong id="selected-numbers">—</strong><p>Total del pedido</p><strong id="selected-total">$0</strong></div>
+          <form id="order-form" class="form-stack"><label>Tu nombre<input name="customer_name" minlength="3" maxlength="100" autocomplete="name" required></label><label>Tu teléfono con indicativo<input name="customer_contact" type="tel" maxlength="19" autocomplete="tel" placeholder="+573001234567" required></label><p class="subtle">Usaremos estos datos para identificar tu transferencia y gestionar este pedido.</p><button type="submit" class="btn primary" id="create-order" disabled>Continuar al QR y la llave ↗</button></form>
+        </article>
+      </div>
+    </section>
+    <section id="order" hidden>
+      <div class="payment-layout">
+        <article class="frame"><h2><span class="payment-step">3</span>Realiza tu transferencia</h2><p id="recipient"></p><strong id="payment-key" class="payment-key"></strong><button id="copy-key" class="btn text" type="button" hidden>Copiar llave</button><img id="payment-qr" class="payment-qr" alt="QR original para la transferencia" hidden><p id="payment-instructions" style="white-space:pre-wrap"></p><p class="small-note" id="payment-deadline"></p></article>
+        <article class="frame"><h2>Seguimiento de tu pedido</h2><strong id="order-state" class="payment-status-label"></strong><div class="payment-summary"><small>Tus números</small><strong id="order-numbers"></strong><p>Total a transferir</p><strong id="order-total"></strong></div><p class="subtle">Identificador del pedido</p><code id="order-reference" class="payment-ref"></code><p id="review-note" class="small-note" hidden></p>
+          <form id="report-form" class="form-stack" hidden><label>Referencia de tu transferencia<input id="transfer-reference" name="payment_reference" minlength="3" maxlength="120" required placeholder="Número o código que aparece en el comprobante"></label><button class="btn primary" type="submit">Ya transferí · Enviar a revisión</button><p>El administrador comprobará el ingreso y confirmará tus números.</p></form>
+          <div class="payment-actions"><button id="refresh-order" class="btn text" type="button">↻ Consultar estado</button><button id="new-order" class="btn text" type="button" hidden>Elegir otros números</button><a href="../admin/" class="btn text" id="back-admin" hidden>Volver al panel</a></div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <script src="../admin/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script><script type="module" src="app.mjs?v=19"></script>
+</body>
+</html>

@@ -114,6 +114,7 @@
     $('dashboardDossier').dataset.dossier=raffle.id;
     $('dashboardNumbers').dataset.numbers=raffle.id;
     $('dashboardPreview').dataset.preview=raffle.id;
+    $('dashboardPayments').dataset.payments=raffle.id;
     $('dashboardPrize').textContent=raffle.state==='draft'&&canWrite()?'Añadir fotos / premio ↗':'Consultar premio ↗';
   }
   function el(tag,attrs={},value){
@@ -141,6 +142,7 @@
       actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'▤ Expediente'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{preview:r.id}},'✦ Vista cliente'));
+      actions.append(el('button',{type:'button',class:'mini',dataset:{payments:r.id}},'Pagos por QR'));
       if(r.state==='draft')actions.append(el('button',{type:'button',class:'mini',dataset:{lab:r.id}},'Pedidos de prueba'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{numbers:r.id}},'▦ Números'));
       if(canWrite()&&r.state==='draft'){
@@ -611,6 +613,10 @@
     }
     if(button.dataset.preview){
       if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(button.dataset.preview)) location.assign('vista-previa.html?rifa='+encodeURIComponent(button.dataset.preview));
+      return;
+    }
+    if(button.dataset.payments){
+      if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(button.dataset.payments))location.assign('pagos-manuales.html?rifa='+encodeURIComponent(button.dataset.payments));
       return;
     }
     if(button.dataset.dossier){

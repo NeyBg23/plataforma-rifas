@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><title>Pagos por QR | El toque de la suerte!</title>
+  <link rel="icon" href="../favicon.svg"><link rel="stylesheet" href="styles.css?v=19">
+  <link rel="stylesheet" href="../pagos/manual.css?v=19">
+</head>
+<body data-theme="dark">
+  <header class="sitehead"><a href="./" class="brand"><span class="star">✦</span><span><strong>El toque de la suerte!</strong><small>Pagos por transferencia</small></span></a><div class="head-actions"><button type="button" class="btn text small" id="theme-toggle">☀ Tema claro</button><a class="btn text small" href="./">← Panel</a></div></header>
+  <main class="payment-main">
+    <span class="eyebrow">CONFIGURACIÓN Y REVISIÓN</span><h1>Pagos por QR y llave.</h1>
+    <p class="payment-lead" id="raffle-title">Comprobando acceso al sorteo…</p>
+    <p class="notice" id="status" role="status" aria-live="polite">Verificando sesión…</p>
+    <section id="workspace" hidden>
+      <div class="payment-layout">
+        <article class="frame">
+          <h2><span class="payment-step">1</span>Configura dónde pagar</h2>
+          <p>Sube tu imagen QR original o escribe tu llave. Los pedidos conservan las instrucciones que vieron al crearse.</p>
+          <form id="settings-form" class="form-stack">
+            <label>Titular que recibe el pago<input id="recipient" name="recipient" minlength="3" maxlength="120" required placeholder="Nombre del titular"></label>
+            <label>Banco o billetera<input id="institution" name="institution" minlength="2" maxlength="100" required placeholder="Nombre de la entidad"></label>
+            <label>Llave, palabra o número para pagar<input id="payment-key" name="payment_key" maxlength="160" placeholder="Escribe exactamente tu llave"></label>
+            <label>Texto para el cliente<textarea id="instructions" name="instructions" maxlength="1500" placeholder="Indica cómo pagar y dónde encontrar la referencia de la transferencia."></textarea></label>
+            <label>Imagen de tu QR<input id="qr-file" name="qr_file" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG o WebP. Máximo 5 MB.</small></label>
+            <label class="payment-choice"><input id="remove-qr" type="checkbox">Quitar el QR guardado al guardar</label>
+            <label class="payment-choice"><input id="enabled" name="enabled" type="checkbox">Activar este medio de pago</label>
+            <button type="submit" class="btn primary" id="save-settings">Guardar QR e instrucciones</button>
+          </form>
+          <div class="payment-preview"><h2>Así se mostrará el pago</h2><p id="preview-recipient">Aún no has guardado los datos.</p><strong class="payment-key" id="preview-key"></strong><img id="preview-qr" class="payment-qr" alt="QR de pago guardado" hidden><p id="preview-instructions"></p></div>
+          <div class="payment-links"><a id="test-payment" class="btn text" href="#">Probar recorrido completo ↗</a><a id="public-payment" class="btn text" href="#" hidden>Abrir pago para clientes ↗</a></div>
+          <p class="small-note" id="publication-note"></p>
+        </article>
+        <article class="frame">
+          <h2><span class="payment-step">2</span>Revisa las transferencias</h2>
+          <p>Comprueba la referencia y el valor en tu banco antes de confirmar. Cada decisión queda registrada con tu cuenta.</p>
+          <div class="payment-tabs"><button id="real-orders" class="btn text" type="button" aria-pressed="false">Pedidos reales</button><button id="test-orders" class="btn text" type="button" aria-pressed="true">Pruebas</button><button id="refresh-orders" class="btn text" type="button">↻ Actualizar</button></div>
+          <p id="orders-mode" class="small-note"></p>
+          <div id="orders" class="payment-list" aria-live="polite"></div>
+          <div class="payment-pager"><button id="orders-previous" class="btn text" type="button" disabled>← Anteriores</button><span id="orders-page"></span><button id="orders-next" class="btn text" type="button" disabled>Siguientes →</button></div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+  <script type="module" src="pagos-manuales.mjs?v=19"></script>
+</body>
+</html>

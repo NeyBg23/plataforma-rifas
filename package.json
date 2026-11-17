@@ -1,11 +1,11 @@
 {
   "name": "el-toque-de-la-suerte",
-  "version": "0.18.2",
+  "version": "0.19.0",
   "private": true,
-  "description": "El toque de la suerte! · laboratorio de pedidos autenticados, aislado de ventas y pagos.",
+  "description": "El toque de la suerte! · gestión de sorteos y transferencias con revisión manual.",
   "scripts": {
     "build": "npm test && node scripts/build-site.mjs",
-    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs tests/test_v14_public.mjs tests/test_v15_domain.mjs tests/test_v16_express.mjs tests/test_v16_1_dashboard.mjs tests/test_v17_private_preview.mjs tests/test_v18_1_domain.mjs tests/test_v18_2_server.mjs"
+    "test": "node --test tests/v11_domain.test.mjs tests/test_v12_1.mjs tests/test_v13_payment.mjs tests/test_v14_public.mjs tests/test_v15_domain.mjs tests/test_v16_express.mjs tests/test_v16_1_dashboard.mjs tests/test_v17_private_preview.mjs tests/test_v18_1_domain.mjs tests/test_v18_2_server.mjs tests/test_manual_payments.mjs"
   },
   "engines": {
     "node": ">=20"

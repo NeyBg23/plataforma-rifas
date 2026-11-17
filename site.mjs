@@ -38,7 +38,8 @@ function noCampaigns() {
 }
 function campaignCard(item) {
   const draw = item.drawAt && !Number.isNaN(new Date(item.drawAt).getTime()) ? new Date(item.drawAt).toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric',timeZone:'America/Bogota'}) : 'Por confirmar';
-  return `<article class="campaign-card"><div class="campaign-visual" aria-hidden="true">✦</div><div class="campaign-body"><span class="campaign-tag">${escapeHtml(item.category || 'Campaña')}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description || 'Consulta la información de la campaña.')}</p><div class="campaign-facts"><span>Fecha: <strong>${escapeHtml(draw)}</strong></span><span>Números: <strong>${item.totalNumbers ?? '—'}</strong></span></div><div class="campaign-bottom"><span>${item.price ? money(item.price) + ' / número' : 'Valor por confirmar'}</span><span class="public-readonly">Consulta · sin pagos</span></div></div></article>`;
+  const paymentUrl = 'pagar/?rifa=' + encodeURIComponent(item.id);
+  return `<article class="campaign-card"><div class="campaign-visual" aria-hidden="true">✦</div><div class="campaign-body"><span class="campaign-tag">${escapeHtml(item.category || 'Campaña')}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description || 'Consulta la información de la campaña.')}</p><div class="campaign-facts"><span>Fecha: <strong>${escapeHtml(draw)}</strong></span><span>Números: <strong>${item.totalNumbers ?? '—'}</strong></span></div><div class="campaign-bottom"><span>${item.price ? money(item.price) + ' / número' : 'Valor por confirmar'}</span><a class="public-readonly" href="${escapeHtml(paymentUrl)}">Elegir números ↗</a></div></div></article>`;
 }
 async function loadCampaigns() {
   try {

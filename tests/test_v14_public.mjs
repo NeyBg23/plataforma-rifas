@@ -11,7 +11,7 @@ test('La portada V14 ya no redirige automáticamente a la demostración',()=>{
   assert.match(html,/id="campaign-list"/);
 });
 test('Wompi permanece sin botón de cobro ni claves privadas',()=>{
-  assert.match(html,/Pagos no disponibles/);
+  assert.match(html,/La integración de Wompi está en preparación/);
   assert.match(html,/disabled aria-disabled="true"/);
   assert.doesNotMatch(html,/service_role|sb_secret_|private_key/i);
 });

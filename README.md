@@ -1,5 +1,7 @@
 # El toque de la suerte! — V9
 
+**Actualización V19**. El panel permite configurar pagos manuales por QR y llave, registrar la referencia de una transferencia y revisarla para confirmar o liberar números. Incluye un recorrido privado de prueba. La apertura pública conserva los requisitos de publicación y autorización de cada campaña. [Configuración, permisos y pruebas de V19](docs/V19_PAGOS_MANUALES_QR.md).
+
 Plataforma de rifas **en desarrollo** con una experiencia pública de demostración y un administrador conectado a un proyecto independiente de Supabase.
 
 **No cuenta con autorización para comercializar rifas. No procesa pagos, no emite boletas y no permite reservar, vender ni asignar números desde el navegador.** Las rifas que aparecen en el catálogo público son ejemplos ficticios.
