@@ -46,3 +46,11 @@ La imagen QR del titular está pendiente de carga y de una comprobación con su 
 El frontend se desplegó como un artefacto estático validado en el proyecto Vercel existente. El despliegue de producción es `dpl_4Xf5w1eu7NDhDJK3eiYpPuj6Q7Nx`, asociado a `el-toque-de-la-suerte.vercel.app`. La función `ets-manual-payments` está en la versión 3. El titular autorizó el 17 de noviembre de 2026 publicar el código de esta versión en el repositorio público `NeyBg23/plataforma-rifas`, en la rama `feature/pagos-manuales-qr`.
 
 Si se revierte el frontend, deben conservarse el esquema y los registros de pedidos existentes para su conciliación. Desactivar la configuración impide nuevas selecciones, y los pedidos ya creados conservan su seguimiento.
+
+## V19.1 · Recorrido del cliente
+
+La portada presenta los sorteos, la forma de participar y el pago por QR o llave. Los enlaces del recorrido principal abren la selección y el pago. Cuando todavía no hay sorteos publicados, se muestra un mensaje de próximos sorteos.
+
+La vista previa privada presenta el premio, las fotografías, el valor y la selección. **Continuar al pago** conserva los números y abre el pago manual del mismo sorteo en modo de prueba. Los permisos de personal se comprueban antes de mostrar el borrador.
+
+El pago muestra tres pasos y mensajes según el estado del pedido. Al enviar la referencia, el cliente ve el seguimiento. La vista privada de pruebas conserva una indicación breve de su modo. La publicación de campañas y las validaciones del servidor conservan sus requisitos de autorización.

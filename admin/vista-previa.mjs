@@ -3,8 +3,8 @@ import { isRaffleId, formatNumber, pickPreviewInfo, formatCOP, imageUrlIsPrivate
 
 const $ = id => document.getElementById(id);
 const cfg = window.ETS_PUBLIC_SUPABASE || {};
-const state = { client:null, raffle:null, photos:[], selected:new Set(), page:0, pageSize:100 };
-const labels = {draft:'Borrador',in_review:'En revisión',awaiting_authorization:'Esperando autorización',published:'Publicada',closed:'Finalizada',cancelled:'Cancelada'};
+const state = { client:null, raffle:null, photos:[], selected:new Set(), page:0, pageSize:100, canOrder:false };
+const categories = {moto:'Motocicletas',auto:'Vehículos',tecnologia:'Tecnología',hogar:'Hogar',otros:'Sorteo'};
 const themeKey = 'ets-client-preview-theme';
 const dateLabel = value => value ? new Intl.DateTimeFormat('es-CO',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Bogota'}).format(new Date(value)) : 'Por definir';
 function theme(next) {
@@ -47,9 +47,9 @@ async function loadPhotos(images){
 }
 function updateSelection(){
   const chosen=[...state.selected].sort((a,b)=>a-b);
-  setText('selected-numbers',chosen.length?chosen.map(n=>formatNumber(n,state.raffle.total_numbers)).join(' · '):'Ningún número seleccionado');
+  setText('selected-numbers',chosen.length?chosen.map(n=>formatNumber(n,state.raffle.total_numbers)).join(' · '):'Elige tus números');
   setText('selected-total',formatCOP(chosen.length*state.raffle.ticket_price_cop));
-  $('try-lab-order').disabled=!chosen.length;
+  $('continue-order').disabled=!chosen.length||!state.canOrder;
 }
 function renderNumbers(){
   const {total_numbers}=state.raffle;
@@ -64,7 +64,7 @@ function renderNumbers(){
     const selected=state.selected.has(i);
     const button=createNode('button','',formatNumber(i,total_numbers));
     button.type='button';button.setAttribute('aria-pressed',String(selected));
-    button.setAttribute('aria-label',`Número de ejemplo ${formatNumber(i,total_numbers)}${selected?' seleccionado':''}`);
+    button.setAttribute('aria-label',`Número ${formatNumber(i,total_numbers)}${selected?' seleccionado':''}`);
     button.addEventListener('click',()=>{
       if(state.selected.has(i))state.selected.delete(i);
       else if(state.selected.size<5)state.selected.add(i);
@@ -75,12 +75,11 @@ function renderNumbers(){
   }
   $('number-grid').replaceChildren(fragment);updateSelection();
 }
-$('try-lab-order').addEventListener('click',()=>{
-  if(!state.raffle||!state.selected.size)return;
-  // Se envían solo parámetros ilustrativos. No representa pedido ni autorización.
-  const url=new URL('../laboratorio/pedidos-demo.html',location.href);
-  url.searchParams.set('total',String(state.raffle.total_numbers));
-  url.searchParams.set('price',String(state.raffle.ticket_price_cop));
+$('continue-order').addEventListener('click',()=>{
+  if(!state.raffle||!state.selected.size||!state.canOrder)return;
+  const url=new URL('../pagar/',location.href);
+  url.searchParams.set('rifa',state.raffle.id);
+  url.searchParams.set('modo','prueba');
   url.searchParams.set('numbers',[...state.selected].sort((a,b)=>a-b).join(','));
   location.assign(url.href);
 });
@@ -99,6 +98,7 @@ async function init(){
     if(userError||!user)return block('Debes iniciar sesión en el administrador de este mismo dominio.');
     const {data:staff,error:staffError}=await state.client.from('ets_staff_members').select('role,enabled').eq('user_id',user.id).maybeSingle();
     if(staffError||!staff?.enabled||!['admin','operator','auditor'].includes(staff.role))return block('Tu cuenta no tiene permisos para consultar este sorteo.');
+    state.canOrder=['admin','operator'].includes(staff.role);
     const {data:raffle,error:raffleError}=await state.client.from('ets_raffles').select('id,title,description,category,ticket_price_cop,total_numbers,draw_at,state,authorization_verified').eq('id',id).maybeSingle();
     if(raffleError||!raffle)return block('Este sorteo no existe o no tienes permiso para consultarlo.');
     const info=pickPreviewInfo(raffle);
@@ -110,15 +110,15 @@ async function init(){
     ]);
     if(prizeError||imagesError)return block('No se pudo verificar la ficha privada del premio.');
     setText('raffle-title',info.title);
-    setText('raffle-description',info.description||'Un premio especial está en preparación.');
-    setText('category',info.category);
-    setText('draw-date','Sorteo previsto: '+dateLabel(info.draw_at));
+    setText('raffle-description',info.description);
+    setText('category',categories[info.category]||'Sorteo');
+    setText('draw-date','Sorteo · '+dateLabel(info.draw_at));
     setText('summary-date',dateLabel(info.draw_at));
-    setText('raffle-state',labels[info.state]||'En preparación');
     setText('price',formatCOP(info.ticket_price_cop));
     setText('number-count',new Intl.NumberFormat('es-CO').format(info.total_numbers));
-    const details=[prize?.brand&&('Marca: '+prize.brand),prize?.model&&('Modelo: '+prize.model),prize?.prize_details,prize?.includes_text&&('Incluye: '+prize.includes_text),prize?.delivery_notes&&('Entrega: '+prize.delivery_notes)].filter(Boolean);
-    setText('prize-details',details.join('\n\n')||'Completa la ficha del premio desde el administrador para mostrar aquí sus características.');
+    const details=[prize?.brand&&('Marca · '+prize.brand),prize?.model&&('Modelo · '+prize.model),prize?.prize_details,prize?.includes_text&&('Incluye · '+prize.includes_text),prize?.delivery_notes&&('Entrega · '+prize.delivery_notes)].filter(Boolean);
+    setText('prize-details',details.join('\n\n'));
+    $('prize-info').hidden=!details.length;
     $('loading').hidden=true;$('preview').hidden=false;
     renderNumbers();
     await loadPhotos(images||[]);

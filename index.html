@@ -4,19 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b0d12" />
-  <meta name="description" content="El toque de la suerte!: conoce la plataforma, consulta campañas habilitadas y explora nuestra experiencia digital de demostración." />
+  <meta name="description" content="Conoce los sorteos de El toque de la suerte!, elige tus números y consulta el estado de tu pedido." />
   <meta name="robots" content="noindex,nofollow" />
-  <title>El toque de la suerte! · Experiencias con claridad</title>
+  <title>El toque de la suerte! · Sorteos</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="site.css?v=14.0.0" />
+  <link rel="stylesheet" href="site.css?v=19.1.0" />
   <script src="admin/config.js" defer></script>
-  <script type="module" src="site.mjs?v=14.0.0"></script>
+  <script type="module" src="site.mjs?v=19.1.0"></script>
 </head>
 <body data-theme="dark">
-  <div class="announcement"><span class="status-light"></span> PLATAFORMA EN DESARROLLO <span class="sep">·</span> NO SE RECIBEN PAGOS NI SE EMITEN BOLETAS</div>
   <header class="site-header" id="inicio">
     <div class="shell header-inner">
       <a href="#inicio" class="identity" aria-label="El toque de la suerte, inicio">
@@ -24,16 +23,16 @@
         <span class="identity-name"><strong>El toque de la suerte!</strong><small>Experiencias que inspiran</small></span>
       </a>
       <nav class="desktop-nav" aria-label="Navegación principal">
-        <a href="#campanas">Campañas</a><a href="#como-funciona">Cómo funciona</a><a href="#confianza">Seguridad</a><a href="#preguntas">Ayuda</a>
+        <a href="#campanas">Sorteos</a><a href="#como-funciona">Cómo participar</a><a href="#pagos">Tu pago</a><a href="#preguntas">Ayuda</a>
       </nav>
       <div class="header-actions">
         <button class="icon-btn" type="button" id="theme-toggle" aria-label="Activar tema claro" title="Cambiar tema"><span aria-hidden="true" id="theme-glyph">☀</span><span class="theme-caption" id="theme-label">Tema claro</span></button>
-        <a href="experiencia/" class="header-demo">Explorar demo <span aria-hidden="true">↗</span></a>
+        <a href="#campanas" class="header-demo">Ver sorteos <span aria-hidden="true">↗</span></a>
         <button class="icon-btn mobile-toggle" type="button" id="menu-toggle" aria-expanded="false" aria-controls="mobile-nav" aria-label="Abrir menú"><span aria-hidden="true">☰</span></button>
       </div>
     </div>
     <nav class="mobile-nav shell" id="mobile-nav" aria-label="Navegación móvil" hidden>
-      <a href="#campanas">Campañas</a><a href="#como-funciona">Cómo funciona</a><a href="#confianza">Seguridad</a><a href="#preguntas">Ayuda</a><a href="experiencia/">Probar demostración</a>
+      <a href="#campanas">Sorteos</a><a href="#como-funciona">Cómo participar</a><a href="#pagos">Tu pago</a><a href="#preguntas">Ayuda</a><a href="#pagos">Medios de pago</a>
     </nav>
   </header>
 
@@ -42,68 +41,58 @@
       <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
       <div class="shell hero-layout">
         <div class="hero-copy">
-          <span class="eyebrow"><span class="eyebrow-line"></span> UNA NUEVA FORMA DE VIVIR LA EMOCIÓN</span>
-          <h1 id="hero-title">La emoción de participar. <span class="highlight-text">Con todo a la vista.</span></h1>
-          <p>Estamos construyendo una experiencia digital fácil de explorar, clara en cada paso y diseñada para que siempre sepas dónde encontrar la información importante.</p>
+          <span class="eyebrow"><span class="eyebrow-line"></span> EL TOQUE DE LA SUERTE</span>
+          <h1 id="hero-title">Elige tus números.<br><span class="highlight-text">Vive la emoción.</span></h1>
+          <p>Conoce los premios, encuentra tus números favoritos y revisa tu pedido desde un solo lugar.</p>
           <div class="hero-cta">
-            <a class="action-main" href="#campanas">Ver campañas <span aria-hidden="true">↗</span></a>
-            <a class="action-secondary" href="experiencia/">Conocer la experiencia <span aria-hidden="true">→</span></a>
+            <a class="action-main" href="#campanas">Ver sorteos <span aria-hidden="true">↗</span></a>
+            <a class="action-secondary" href="#como-funciona">Cómo participar <span aria-hidden="true">→</span></a>
           </div>
-          <div class="hero-meta"><span><span class="tiny-diamond">✦</span> Diseño para móvil</span><span><span class="tiny-diamond">✦</span> Consulta transparente</span><span><span class="tiny-diamond">✦</span> Tema claro y oscuro</span></div>
+          <div class="hero-meta"><span><span class="tiny-diamond">✦</span> Elige tus números</span><span><span class="tiny-diamond">✦</span> Paga por transferencia</span><span><span class="tiny-diamond">✦</span> Consulta tu pedido</span></div>
         </div>
-        <div class="hero-stage" aria-label="Ilustración del recorrido de participación, aún no disponible comercialmente">
+        <div class="hero-stage" aria-hidden="true">
           <div class="stage-aura"></div><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
           <div class="glow-number number-top">08</div><div class="glow-number number-bottom">27</div>
           <div class="stage-card">
-            <div class="stage-top"><span class="stage-brand">✦ <span>EL TOQUE</span></span><span class="stage-demo">Vista ilustrativa</span></div>
+            <div class="stage-top"><span class="stage-brand">✦ <span>EL TOQUE</span></span><span class="stage-demo">Tu elección</span></div>
             <div class="stage-icon" aria-hidden="true">✧</div>
-            <div class="stage-label">Una experiencia a tu manera</div>
-            <div class="stage-subtitle">Todo empieza con una elección.</div>
+            <div class="stage-label">Tus números favoritos</div>
+            <div class="stage-subtitle">Cada elección tiene su historia.</div>
             <div class="stage-grid" aria-hidden="true"><span>03</span><span>07</span><span>12</span><span>18</span><span>26</span><span>39</span></div>
             <div class="stage-footer"><span>Simple. Claro. A tu ritmo.</span><span>↗</span></div>
           </div>
-          <div class="stage-sticker">✦ <span>Diseñado para sorprender</span></div>
+          <div class="stage-sticker">✦ <span>La emoción de elegir</span></div>
         </div>
       </div>
     </section>
 
     <section id="campanas" class="section campaigns-section" aria-labelledby="campaigns-title">
       <div class="shell">
-        <div class="section-head"><div><span class="eyebrow"><span class="eyebrow-line"></span> EXPLORA CON CONFIANZA</span><h2 id="campaigns-title">Campañas habilitadas<span class="accent">.</span></h2><p>Aquí aparecerán únicamente campañas cuya publicación esté habilitada y registrada en el sistema.</p></div><div class="section-right"><span class="outline-pill"><span class="status-dot"></span> Estado consultado en Supabase</span></div></div>
-        <div id="campaign-status" class="campaign-status" role="status" aria-live="polite"><span class="loading-ring"></span> Comprobando campañas habilitadas…</div>
+        <div class="section-head"><div><span class="eyebrow"><span class="eyebrow-line"></span> ENCUENTRA TU PRÓXIMO SORTEO</span><h2 id="campaigns-title">Nuestros sorteos<span class="accent">.</span></h2><p>Premio, fecha y valor por número. Toda la información de cada sorteo está aquí.</p></div></div>
+        <div id="campaign-status" class="campaign-status" role="status" aria-live="polite"><span class="loading-ring"></span> Cargando sorteos…</div>
         <div id="campaign-list" class="campaign-grid" aria-live="polite"></div>
-        <div class="campaigns-bottom"><span>¿Quieres conocer cómo se vería una participación?</span><a href="experiencia/">Explorar demostración ficticia <span aria-hidden="true">↗</span></a></div>
+
       </div>
     </section>
 
-    <section class="section showcase-section" aria-labelledby="demo-title">
-      <div class="shell showroom">
-        <div class="showroom-art" aria-hidden="true">
-          <div class="showroom-glare"></div>
-          <img class="showroom-image" src="experiencia/assets/premio-1.svg" alt="" loading="lazy" />
-          <span class="art-label">PREMIO ILUSTRATIVO · NO DISPONIBLE PARA VENTA</span>
-        </div>
-        <div class="showroom-content"><span class="eyebrow"><span class="eyebrow-line"></span> DESCUBRE EL RECORRIDO</span><h2 id="demo-title">Mira cómo se siente. <span class="highlight-text">Sin compromisos.</span></h2><p>Conoce nuestro selector de números, el resumen paso a paso y la consulta de una referencia de prueba. Todo es ficticio y funciona sin dinero ni información personal.</p><div class="showroom-highlights"><span>01. Explorar</span><span>02. Elegir</span><span>03. Revisar</span><span>04. Consultar</span></div><a class="action-main" href="experiencia/">Probar recorrido de demostración <span aria-hidden="true">↗</span></a></div>
-      </div>
-    </section>
 
     <section id="como-funciona" class="section how-section" aria-labelledby="how-title">
-      <div class="shell"><div class="section-head"><div><span class="eyebrow"><span class="eyebrow-line"></span> FÁCIL DESDE EL PRIMER TOQUE</span><h2 id="how-title">Una experiencia sin enredos<span class="accent">.</span></h2><p>Este es el recorrido que estamos preparando para cuando pueda funcionar comercialmente.</p></div></div>
+      <div class="shell"><div class="section-head"><div><span class="eyebrow"><span class="eyebrow-line"></span> FÁCIL DESDE EL PRIMER TOQUE</span><h2 id="how-title">Una experiencia sin enredos<span class="accent">.</span></h2><p>Desde tu selección hasta la confirmación de tu pago.</p></div></div>
         <div class="steps-grid">
-          <article class="step-card"><span class="step-index">01 / DESCUBRE</span><div class="step-art">⌑</div><h3>Conoce cada premio</h3><p>Detalles completos, condiciones y documentación verificable antes de elegir.</p></article>
-          <article class="step-card"><span class="step-index">02 / ELIGE</span><div class="step-art">#</div><h3>Explora los números</h3><p>Una selección clara y un resumen que facilite revisar lo que estás haciendo.</p></article>
-          <article class="step-card"><span class="step-index">03 / VERIFICA</span><div class="step-art">◇</div><h3>Revisa cada paso</h3><p>Estado, información relevante y comprobaciones disponibles desde un mismo lugar.</p></article>
-          <article class="step-card"><span class="step-index">04 / CONSULTA</span><div class="step-art">↗</div><h3>Sigue el resultado</h3><p>Información del sorteo y seguimiento transparente cuando exista operación habilitada.</p></article>
+          <article class="step-card"><span class="step-index">01 / DESCUBRE</span><div class="step-art">⌑</div><h3>Conoce cada premio</h3><p>Encuentra el premio que te gusta y consulta su fecha y condiciones.</p></article>
+          <article class="step-card"><span class="step-index">02 / ELIGE</span><div class="step-art">#</div><h3>Elige tus números</h3><p>Selecciona tus favoritos y revisa el total antes de continuar.</p></article>
+          <article class="step-card"><span class="step-index">03 / PAGA</span><div class="step-art">◇</div><h3>Paga con QR o llave</h3><p>Transfiere el valor de tu pedido y envía la referencia del pago.</p></article>
+          <article class="step-card"><span class="step-index">04 / CONSULTA</span><div class="step-art">↗</div><h3>Consulta tu pedido</h3><p>Verás la confirmación cuando el organizador revise tu transferencia.</p></article>
         </div>
       </div>
     </section>
 
-    <section id="confianza" class="section trust-section" aria-labelledby="trust-title"><div class="shell trust-layout"><div class="trust-intro"><span class="eyebrow"><span class="eyebrow-line"></span> LO QUE ESTAMOS CONSTRUYENDO</span><h2 id="trust-title">La confianza no debería ser una apuesta<span class="accent">.</span></h2><p>La presentación es importante, pero la ingeniería es lo que permitirá respaldar cada operación. Estas son las capacidades que estamos desarrollando y validando.</p></div><div class="trust-cards"><div class="trust-card"><div class="trust-symbol">◈</div><div><h3>Trazabilidad</h3><p>Historial de operaciones y referencias verificables, sujeto a pruebas de integración.</p></div></div><div class="trust-card"><div class="trust-symbol">⌁</div><div><h3>Reglas de autorización</h3><p>Las campañas solo pueden mostrarse cuando cumplen las condiciones de publicación del sistema.</p></div></div><div class="trust-card"><div class="trust-symbol">✧</div><div><h3>Transferencias verificadas</h3><p>El administrador revisa el ingreso y la referencia antes de confirmar los números de cada pedido.</p></div></div></div></div></section>
+    <section id="confianza" class="section trust-section" aria-labelledby="trust-title"><div class="shell trust-layout"><div class="trust-intro"><span class="eyebrow"><span class="eyebrow-line"></span> INFORMACIÓN A TU ALCANCE</span><h2 id="trust-title">Tu pedido, paso a paso<span class="accent">.</span></h2><p>Consulta el total, los datos de pago y el estado de tus números durante el recorrido.</p></div><div class="trust-cards"><div class="trust-card"><div class="trust-symbol">◈</div><div><h3>Un pedido identificado</h3><p>Tu selección y su valor quedan asociados a una referencia de pedido.</p></div></div><div class="trust-card"><div class="trust-symbol">⌁</div><div><h3>Datos antes de pagar</h3><p>El titular, la entidad y el valor aparecen junto al medio de pago del sorteo.</p></div></div><div class="trust-card"><div class="trust-symbol">✧</div><div><h3>Confirmación visible</h3><p>El organizador revisa la transferencia y actualiza el estado de tu pedido.</p></div></div></div></div></section>
 
-    <section class="section payment-section" id="pagos" aria-labelledby="payment-title"><div class="shell payment-panel"><div class="payment-symbol" aria-hidden="true">↗</div><div class="payment-description"><span class="eyebrow">PAGO POR TRANSFERENCIA</span><h2 id="payment-title">Escanea, transfiere y reporta.</h2><p>En cada sorteo habilitado encontrarás el QR o la llave del titular. Reporta la referencia y consulta tu pedido mientras el administrador revisa el ingreso. La integración de Wompi está en preparación.</p></div><div class="payment-provider"><span class="provider-name">QR + llave</span><span class="provider-label">Confirmación manual</span><button type="button" disabled aria-disabled="true">Elige un sorteo habilitado</button></div></div></section>
+    <section class="section payment-section" id="pagos" aria-labelledby="payment-title"><div class="shell payment-panel"><div class="payment-symbol" aria-hidden="true">↗</div><div class="payment-description"><span class="eyebrow">PAGO POR TRANSFERENCIA</span><h2 id="payment-title">Tu pago, en pocos pasos.</h2><p>El pedido muestra el QR o la llave del sorteo. Después de transferir, envía la referencia y consulta la confirmación.</p></div><div class="payment-provider"><span class="provider-name">QR + llave</span><span class="provider-label">Transferencia con revisión</span><a class="action-main" href="#campanas">Ver sorteos <span aria-hidden="true">↗</span></a></div></div></section>
 
-    <section id="preguntas" class="section faq-section" aria-labelledby="faq-title"><div class="shell faq-layout"><div><span class="eyebrow"><span class="eyebrow-line"></span> RESOLVEMOS TUS DUDAS</span><h2 id="faq-title">Todo más claro, <span class="highlight-text">desde el principio.</span></h2><p>Información sobre el estado actual de esta plataforma.</p></div><div class="faq-list"><details><summary>¿Cómo elijo y pago mis números?</summary><p>Abre una campaña publicada y habilitada, elige tus números y registra tu pedido. Verás el QR o la llave y el valor. Reporta la referencia de la transferencia para que el administrador la revise.</p></details><details><summary>¿Por qué todavía no aparecen campañas?</summary><p>El catálogo consulta únicamente campañas publicadas y habilitadas. Los borradores del administrador permanecen privados.</p></details><details><summary>¿La demostración crea una participación real?</summary><p>No. La ruta de demostración usa premios ficticios y guarda referencias locales sin valor comercial ni posibilidad de reclamar premios.</p></details><details><summary>¿Se podrá pagar con Wompi?</summary><p>Es un proveedor previsto. Solo se habilitará después de completar la integración técnica, las aprobaciones comerciales y los requisitos legales aplicables.</p></details></div></div></section>
+    <section id="preguntas" class="section faq-section" aria-labelledby="faq-title"><div class="shell faq-layout"><div><span class="eyebrow"><span class="eyebrow-line"></span> RESOLVEMOS TUS DUDAS</span><h2 id="faq-title">Todo más claro, <span class="highlight-text">desde el principio.</span></h2><p>Respuestas para elegir, pagar y consultar tu pedido.</p></div><div class="faq-list"><details><summary>¿Cómo participo?</summary><p>Abre un sorteo, elige tus números y completa tus datos. Tu pedido mostrará el total y el medio de pago.</p></details><details><summary>¿Cuándo aparecen nuevos sorteos?</summary><p>Encontrarás cada sorteo aquí cuando se abra al público, junto con su premio, fecha y condiciones.</p></details><details><summary>¿Cuándo se confirman mis números?</summary><p>Quedan confirmados cuando el organizador verifica la transferencia. Puedes consultar el estado desde la página de tu pedido.</p></details><details><summary>¿Dónde encuentro la referencia del pago?</summary><p>Tu banco o billetera la muestra en el comprobante de la transferencia. Ingresa ese código en tu pedido después de pagar.</p></details></div></div></section>
   </main>
-  <footer class="footer"><div class="shell footer-top"><div><div class="footer-brand">✦ <strong>El toque de la suerte!</strong></div><p>Una plataforma que se construye con claridad en cada paso.</p></div><div class="footer-links"><a href="#campanas">Campañas</a><a href="#como-funciona">Cómo funciona</a><a href="experiencia/">Demostración</a><a href="admin/">Acceso administrativo</a></div></div><div class="shell footer-bottom"><span>© 2026 El toque de la suerte! · Versión de desarrollo</span><span>Campañas sujetas a publicación y habilitación. Transferencias con revisión manual.</span></div></footer>
+  <footer class="footer"><div class="shell footer-top"><div><div class="footer-brand">✦ <strong>El toque de la suerte!</strong></div><p>La emoción empieza con tu elección.</p></div><div class="footer-links"><a href="#campanas">Sorteos</a><a href="#como-funciona">Cómo participar</a><a href="#preguntas">Preguntas frecuentes</a><a href="admin/">Acceso administrativo</a></div></div><div class="shell footer-bottom"><span>© 2026 El toque de la suerte!</span><span>Consulta las condiciones de cada sorteo.</span></div></footer>
 </body>
 </html>

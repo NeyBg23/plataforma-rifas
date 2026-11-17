@@ -1,14 +1,28 @@
-import {authClient,paymentRequest,money,numberLabel,dateLabel,states,node,showQr,setupTheme} from '../pagos/api.mjs';
+import {authClient,paymentRequest,money,numberLabel,dateLabel,node,showQr,setupTheme} from '../pagos/api.mjs';
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const raffleId = params.get('rifa');
 const isTest = params.get('modo') === 'prueba';
 const storageKey = 'ets-manual-order:' + raffleId + ':' + isTest;
 const state = {client:null,raffle:null,selected:new Set(),unavailable:new Set(),page:0,access:null,order:null,busy:false};
+const orderMessages = {
+  awaiting_payment:['Tu pedido está listo','Encontrarás el QR o la llave junto al valor de tu pedido.'],
+  pending_review:['Estamos revisando tu pago','Recibimos tu referencia. Tus números están apartados mientras se verifica la transferencia.'],
+  confirmed:['Tu pago está confirmado','Tus números quedaron confirmados. Puedes consultar este pedido cuando quieras.'],
+  rejected:['Pago sin confirmar','Consulta la nota del organizador para revisar lo sucedido con tu transferencia.'],
+  expired:['El plazo de tu pedido terminó','Puedes elegir otros números. Si ya transferiste, comunícate con el organizador.']
+};
 setupTheme($('theme-toggle'));
 $('test-banner').hidden = !isTest;
 $('back-admin').hidden = !isTest;
-function status(message,error = false) { $('status').textContent = message; $('status').dataset.error = String(error); }
+function status(message,error = false) { $('status').textContent = message; $('status').dataset.error = String(error); $('status').hidden = !message; }
+function progress(current) {
+  $('payment-progress').hidden = false;
+  for (const id of ['numbers','payment','confirmation']) {
+    if (id === current) $('step-'+id).setAttribute('aria-current','step');
+    else $('step-'+id).removeAttribute('aria-current');
+  }
+}
 function request(action,extra = {}) { return paymentRequest({action,raffle_id:raffleId,is_test:isTest,...extra},state.client); }
 function busy(value) {
   state.busy = value;
@@ -56,6 +70,8 @@ async function quote() {
   $('price').textContent = money(state.raffle.ticket_price_cop) + ' por número';
   $('selection').hidden = false;
   $('order').hidden = true;
+  $('unavailable').hidden = true;
+  progress('numbers');
   renderNumbers();
 }
 function renderOrder(order) {
@@ -68,7 +84,13 @@ function renderOrder(order) {
   $('copy-key').hidden = !details.payment_key;
   $('payment-instructions').textContent = details.instructions;
   showQr($('payment-qr'),details.qr_url);
-  $('order-state').textContent = states[order.state] || order.state;
+  const [title,message] = orderMessages[order.state] || ['Consultando tu pedido','Actualiza el estado en unos momentos.'];
+  $('order-state').textContent = title;
+  $('order-message').textContent = message;
+  $('order-state').dataset.state = order.state;
+  $('transfer-panel').hidden = order.state !== 'awaiting_payment';
+  $('order-layout').classList.toggle('order-complete',order.state !== 'awaiting_payment');
+  progress(order.state === 'awaiting_payment' ? 'payment' : 'confirmation');
   $('order-numbers').textContent = order.numbers.map(n => state.raffle ? numberLabel(n,state.raffle.total_numbers) : String(n)).join(' · ');
   $('order-total').textContent = money(order.amount_cop);
   $('order-reference').textContent = order.id;
@@ -76,9 +98,7 @@ function renderOrder(order) {
   $('new-order').hidden = ['awaiting_payment','pending_review'].includes(order.state);
   $('review-note').hidden = !order.review_note;
   $('review-note').textContent = order.review_note || '';
-  $('payment-deadline').textContent = order.state === 'awaiting_payment' ? 'Tienes hasta el ' + dateLabel(order.expires_at) + ' para reportar tu transferencia.' :
-    order.state === 'pending_review' ? 'Transferencia reportada. Tus números están retenidos mientras el administrador revisa el ingreso.' :
-    order.state === 'confirmed' ? 'Pago confirmado por el administrador.' : 'Este pedido terminó. Consulta con el administrador si realizaste una transferencia.';
+  $('payment-deadline').textContent = 'Envía la referencia de tu pago antes del ' + dateLabel(order.expires_at) + '.';
   // Tras el vencimiento se retira el QR para evitar una transferencia tardía.
   if (['expired','rejected','confirmed'].includes(order.state)) {
     $('payment-qr').hidden = true; $('copy-key').hidden = true; $('payment-key').hidden = true;
@@ -114,7 +134,7 @@ $('order-form').addEventListener('submit',event => {
     try {
       const result = await request('place',{...state.access,numbers,customer_name:customerName,customer_contact:customerContact});
       renderOrder(result.order);
-      status(isTest ? 'Pedido de prueba guardado. Continúa con una referencia ficticia.' : 'Pedido guardado. Transfiere el valor indicado y reporta la referencia.');
+      status('');
     } catch (error) {
       if (error.conflict) { state.access = null; localStorage.removeItem(storageKey); await quote(); }
       throw error;
@@ -128,10 +148,10 @@ $('report-form').addEventListener('submit',event => {
   void run(async () => {
     const result = await request('report',{order_id:state.access.order_id,access_token:state.access.access_token,payment_reference:reference});
     renderOrder(result.order);
-    status('Referencia recibida. El administrador revisará tu transferencia.');
+    status('');
   });
 });
-$('refresh-order').addEventListener('click',() => void run(async () => { await refreshOrder(); status('Estado actualizado.'); }));
+$('refresh-order').addEventListener('click',() => void run(async () => { await refreshOrder(); status(''); }));
 $('copy-key').addEventListener('click',async () => {
   try { await navigator.clipboard.writeText(state.order.payment_details.payment_key); status('Llave copiada.'); }
   catch { status('Selecciona y copia la llave que aparece en pantalla.',true); }
@@ -139,7 +159,7 @@ $('copy-key').addEventListener('click',async () => {
 $('new-order').addEventListener('click',() => void run(async () => {
   const previousAccess = state.access;
   state.order = null; state.access = null; state.selected.clear();
-  try { await quote(); localStorage.removeItem(storageKey); status('Elige los números del siguiente pedido.'); }
+  try { await quote(); localStorage.removeItem(storageKey); status(''); }
   catch (error) { state.access = previousAccess; await refreshOrder(); throw error; }
 }));
 for (const [id,delta] of [['previous',-1],['next',1]]) $(id).addEventListener('click',() => void run(async () => {
@@ -149,12 +169,18 @@ for (const [id,delta] of [['previous',-1],['next',1]]) $(id).addEventListener('c
 }));
 async function start() {
   $('retry-loading').hidden = true;
-  if (isTest) state.client = authClient();
+  if (isTest) {
+    state.client = authClient();
+    const previewUrl = new URL('../admin/vista-previa.html',location.href);
+    previewUrl.searchParams.set('rifa',raffleId);
+    $('back-to-raffle').href = previewUrl.href;
+    $('back-to-raffle').textContent = '← Volver al sorteo';
+  }
   let stored;
   try { stored = JSON.parse(localStorage.getItem(storageKey) || 'null'); } catch {}
   if (stored && typeof stored.order_id === 'string' && /^[a-f0-9]{64}$/.test(stored.access_token || '')) {
     state.access = stored;
-    try { await refreshOrder(); status('Recuperamos el estado de tu pedido.'); return; }
+    try { await refreshOrder(); status(''); return; }
     catch (error) {
       if (error.status !== 422 || error.message !== 'Pedido no encontrado.') throw error;
       state.access = null;
@@ -162,10 +188,26 @@ async function start() {
     }
   }
   await quote();
-  status('Elige tus números para continuar.');
+  const selectedNumbers = params.get('numbers');
+  if (selectedNumbers && /^\d+(,\d+){0,4}$/.test(selectedNumbers)) {
+    for (const item of selectedNumbers.split(',')) {
+      const value = Number(item);
+      if (value < state.raffle.total_numbers && !state.unavailable.has(value)) state.selected.add(value);
+    }
+    renderNumbers();
+  }
+  status('');
 }
 $('retry-loading').addEventListener('click',() => void start().catch(initializationError));
 function initializationError(error) {
+  if ([404,409].includes(error.status) && !state.order) {
+    $('unavailable').hidden = false;
+    $('payment-progress').hidden = true;
+    $('unavailable-title').textContent = isTest ? 'El medio de pago estará disponible pronto.' : 'Este sorteo está por abrir.';
+    $('unavailable-description').textContent = isTest ? 'Puedes volver a este paso cuando el organizador confirme su QR o llave.' : 'Aquí encontrarás sus números y el medio de pago cuando esté disponible.';
+    status('');
+    return;
+  }
   status(error.message,true);
   $('retry-loading').hidden = false;
 }

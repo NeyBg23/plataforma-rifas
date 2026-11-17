@@ -10,9 +10,12 @@ test('La portada V14 ya no redirige automáticamente a la demostración',()=>{
   assert.doesNotMatch(html,/location\.(replace|assign)\(/);
   assert.match(html,/id="campaign-list"/);
 });
-test('Wompi permanece sin botón de cobro ni claves privadas',()=>{
-  assert.match(html,/La integración de Wompi está en preparación/);
-  assert.match(html,/disabled aria-disabled="true"/);
+test('La portada dirige al recorrido del cliente y evita enlaces a simulaciones',()=>{
+  assert.match(html,/QR \+ llave/);
+  assert.doesNotMatch(html,/href="(?:experiencia|laboratorio)\//);
+  assert.doesNotMatch(app,/href="experiencia\//);
+  assert.doesNotMatch(html,/PLATAFORMA EN DESARROLLO|Estado consultado en Supabase/);
+  assert.doesNotMatch(html,/checkout\.wompi|widget\.wompi/);
   assert.doesNotMatch(html,/service_role|sb_secret_|private_key/i);
 });
 test('El catálogo usa exclusivamente columnas públicas y filtro published',()=>{

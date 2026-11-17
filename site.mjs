@@ -34,7 +34,7 @@ mobileNav.querySelectorAll('a').forEach(link => link.addEventListener('click', (
 
 function noCampaigns() {
   campaignStatus.hidden = true;
-  campaignList.innerHTML = `<div class="campaign-empty"><div class="empty-emblem" aria-hidden="true">✧</div><div><span class="eyebrow">PRÓXIMAMENTE</span><h3>Estamos preparando las próximas experiencias.</h3><p>Por ahora no hay campañas públicas habilitadas. Mientras tanto, puedes conocer cómo funciona nuestro recorrido de demostración.</p><a href="experiencia/">Conocer la experiencia ficticia <span aria-hidden="true">↗</span></a></div><div class="empty-art" aria-hidden="true">✦</div></div>`;
+  campaignList.innerHTML = `<div class="campaign-empty"><div class="empty-emblem" aria-hidden="true">✧</div><div><span class="eyebrow">PRÓXIMAMENTE</span><h3>Los próximos sorteos están por llegar.</h3><p>Cuando abra un nuevo sorteo, encontrarás aquí su premio, fecha y números.</p><a href="#como-funciona">Cómo participar <span aria-hidden="true">↗</span></a></div><div class="empty-art" aria-hidden="true">✦</div></div>`;
 }
 function campaignCard(item) {
   const draw = item.drawAt && !Number.isNaN(new Date(item.drawAt).getTime()) ? new Date(item.drawAt).toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric',timeZone:'America/Bogota'}) : 'Por confirmar';
@@ -50,10 +50,10 @@ async function loadCampaigns() {
   } catch (error) {
     campaignStatus.hidden = false;
     campaignStatus.classList.add('catalog-warning');
-    campaignStatus.innerHTML = `<span aria-hidden="true">◇</span> No pudimos comprobar las campañas en este momento. No se mostrará información sin verificar. <button type="button" id="retry-catalog">Reintentar ↻</button>`;
+    campaignStatus.innerHTML = `<span aria-hidden="true">◇</span> No pudimos cargar los sorteos. <button type="button" id="retry-catalog">Volver a intentar ↻</button>`;
     document.getElementById('retry-catalog').addEventListener('click', () => {
       campaignStatus.classList.remove('catalog-warning');
-      campaignStatus.textContent = 'Comprobando campañas habilitadas…';
+      campaignStatus.textContent = 'Cargando sorteos…';
       loadCampaigns();
     });
     campaignList.replaceChildren();

@@ -43,16 +43,19 @@ test('V17: consulta privada después de verificar sesión y personal',()=>{
   assert.match(app,/createSignedUrls\(paths,120\)/);
 });
 
-test('V17: no crea reservas, pedidos, cobros ni boletas',()=>{
+test('La vista previa continúa al pago privado sin escribir pedidos al seleccionar',()=>{
   assert.doesNotMatch(app,/\.from\([^)]*\)\.(?:insert|upsert|update|delete)\(|\.rpc\(|checkout\(|createPayment|purchase\(/i);
-  assert.match(html,/Comprar números · no habilitado/);
-  assert.match(html,/Esta selección no se guarda ni crea un pedido/);
-  assert.match(html,/Wompi previsto · Integración pendiente/);
+  assert.match(html,/Continuar al pago/);
+  assert.match(app,/new URL\('\.\.\/pagar\/',location\.href\)/);
+  assert.match(app,/searchParams\.set\('modo','prueba'\)/);
+  assert.match(app,/searchParams\.set\('rifa',state\.raffle\.id\)/);
+  assert.match(app,/searchParams\.set\('numbers'/);
+  assert.doesNotMatch(app,/laboratorio\/pedidos-demo/);
 });
 
 test('V17: datos visibles siempre por texto y fotos firmadas',()=>{
   assert.doesNotMatch(app,/innerHTML|outerHTML|document\.write|eval\(/);
   assert.match(app,/\.textContent=/);
   assert.match(app,/imageUrlIsPrivate\(entry\.signedUrl,cfg\.url\)/);
-  assert.match(html,/VISTA PRIVADA DE DESARROLLO/);
+  assert.match(html,/Vista previa privada/);
 });

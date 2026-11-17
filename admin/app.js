@@ -143,7 +143,7 @@
       actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'▤ Expediente'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{preview:r.id}},'✦ Vista cliente'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{payments:r.id}},'Pagos por QR'));
-      if(r.state==='draft')actions.append(el('button',{type:'button',class:'mini',dataset:{lab:r.id}},'Pedidos de prueba'));
+      if(r.state==='draft')actions.append(el('button',{type:'button',class:'mini',dataset:{lab:r.id}},'Pruebas internas'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{numbers:r.id}},'▦ Números'));
       if(canWrite()&&r.state==='draft'){
         actions.append(el('button',{type:'button',class:'mini',dataset:{edit:r.id}},'Editar'));
