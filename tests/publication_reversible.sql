@@ -20,9 +20,7 @@ begin
   insert into public.ets_raffles(id,title,description,category,ticket_price_cop,total_numbers,created_by,draw_at)
     values(campaign,'Ficha ficticia de prueba','Descripción ficticia','hogar',20000,100,admin_id,now()+interval '10 days');
   insert into public.ets_prizes(raffle_id,prize_kind,prize_condition,prize_details,delivery_notes,updated_by)
-    values(campaign,'cash','other','Premio ficticio para prueba','Entrega ficticia',admin_id);
-  insert into public.ets_prize_images(raffle_id,storage_path,alt_text,uploaded_by)
-    values(campaign,campaign::text || '/' || admin_id::text || '/' || gen_random_uuid()::text || '.png','Foto ficticia',admin_id);
+    values(campaign,'cash','other','TV LG','En sede',admin_id);
   insert into public.ets_campaign_dossiers(raffle_id,organizer_name,competent_authority,authorization_reference_claimed,updated_by)
     values(campaign,'Gestor de prueba','Autoridad de prueba','PRUEBA-ACTO',admin_id);
   insert into storage.objects(bucket_id,name) values('ets-campaign-evidence',evidence_path);
@@ -30,11 +28,10 @@ begin
     values(document,campaign,evidence_path,'authorization_claim','soporte-ficticio.pdf','application/pdf',1,admin_id);
   insert into ets_manual.settings(raffle_id,recipient,institution,payment_key,enabled,updated_by)
     values(campaign,'PRUEBA SIN DINERO','Banco ficticio','SOLO-PRUEBA',true,admin_id);
-  update public.ets_raffles set state='in_review' where id=campaign;
 
   execute 'set local role anon';
   if exists (select id from public.ets_raffles where id=campaign) then
-    raise exception 'Un visitante pudo ver la rifa en revisión';
+    raise exception 'Un visitante pudo ver la rifa en borrador';
   end if;
   execute 'reset role';
   if has_schema_privilege('authenticated','ets_internal','USAGE') or
@@ -62,8 +59,8 @@ begin
     raise exception 'La verificación no dejó una ficha lista';
   end if;
   execute 'set local role authenticated';
-  update public.ets_raffles set state='draft' where id=campaign;
-  if (select state from public.ets_raffles where id=campaign) is distinct from 'in_review' then
+  update public.ets_raffles set state='in_review' where id=campaign;
+  if (select state from public.ets_raffles where id=campaign) is distinct from 'draft' then
     raise exception 'Una cuenta web modificó datos aprobados';
   end if;
   execute 'reset role';
@@ -80,7 +77,7 @@ begin
   end if;
   update public.ets_raffles set title='Ficha ficticia de prueba' where id=campaign;
   if ets_internal.publish_raffle_listing(campaign,admin_id) <> 'listed' then
-    raise exception 'La ficha autorizada no cambió a publicada';
+    raise exception 'La ficha autorizada no pasó de borrador a publicada';
   end if;
   perform ets_internal.publish_raffle_listing(campaign,admin_id);
   if (select count(*) from public.ets_raffle_audit

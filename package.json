@@ -1,6 +1,6 @@
 {
   "name": "el-toque-de-la-suerte",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "private": true,
   "description": "El toque de la suerte! · gestión de sorteos y transferencias con revisión manual.",
   "scripts": {

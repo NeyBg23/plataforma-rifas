@@ -25,8 +25,9 @@ test('un expediente vacío nunca está listo para revisión',()=>{
   assert.equal(result.internalReady,false);
 });
 test('soportes completos no equivalen a autorización comercial',()=>{
-  const result=dossierChecklist({raffle:{title:'Rifa',total_numbers:100,ticket_price_cop:1000,draw_at:'2027-01-01T10:00:00Z',state:'draft',authorization_verified:false},dossier:{organizer_name:'Organizador',competent_authority:'Autoridad'},prize:{prize_details:'Todas las especificaciones del premio',delivery_notes:'Entrega en oficina'},photoCount:4,documents:[{document_kind:'authorization_claim'}]});
-  assert.equal(result.completed,6);
+  const result=dossierChecklist({raffle:{title:'Rifa',total_numbers:100,ticket_price_cop:1000,draw_at:'2027-01-01T10:00:00Z',state:'draft',authorization_verified:false},dossier:{organizer_name:'Organizador',competent_authority:'Autoridad',authorization_reference_claimed:'ABC123'},prize:{prize_kind:'in_kind',prize_details:'TV LG',delivery_notes:'En sede'},documents:[{document_kind:'authorization_claim'}]});
+  assert.equal(result.completed,5);
+  assert.equal(result.total,6);
   assert.equal(result.internalReady,true);
   assert.equal(result.legallyEnabled,false);
 });

@@ -26,7 +26,7 @@ test('V16.1: no habilita venta ni altera estados',()=>{
   const segment=js.slice(js.indexOf('function renderMetrics(){'),js.indexOf('function el(tag,'));
   assert.ok(segment.includes("state.raffles"));
   assert.doesNotMatch(segment,/\.insert\(|\.update\(|\.rpc\(|\bfetch\(/);
-  assert.match(html,/Abre el expediente para consultar el estado de publicación/);
+  assert.match(html,/class="btn primary" id="dashboardDossier" data-dossier="">Publicación/);
   assert.match(html,/Panel de gestión · (?:V16\.1 Express|V17)/);
 });
 

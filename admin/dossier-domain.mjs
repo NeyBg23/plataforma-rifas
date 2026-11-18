@@ -34,18 +34,17 @@ export function dossierEditable(raffle, role) {
   return Boolean(raffle && ['admin','operator'].includes(role) &&
     ['draft','in_review','awaiting_authorization'].includes(raffle.state) && !raffle.authorization_verified);
 }
-export function dossierChecklist({raffle,dossier,prize,photoCount=0,documents=[]}={}) {
+export function dossierChecklist({raffle,dossier,prize,documents=[]}={}) {
   const docs = Array.isArray(documents) ? documents : [];
   const items = [
     {id:'campaign', label:'Campaña registrada', detail:'Premio, numeración y valor registrados en el sistema', done:Boolean(raffle && raffle.title?.trim() && raffle.total_numbers>0 && raffle.ticket_price_cop>0)},
-    {id:'prize', label:'Ficha del premio', detail:'Características y entrega descritas', done:Boolean(prize && String(prize.prize_details||'').trim().length>=10 && String(prize.delivery_notes||'').trim().length>=8)},
-    {id:'photos', label:'Fotografías del premio', detail:'Al menos una foto registrada en la galería privada', done:photoCount>0},
-    {id:'organizer', label:'Datos del organizador', detail:'Nombre y autoridad competente declarados', done:Boolean(dossier && String(dossier.organizer_name||'').trim().length>=3 && String(dossier.competent_authority||'').trim().length>=3)},
+    {id:'prize', label:'Ficha del premio', detail:'Tipo, descripción y entrega registrados', done:Boolean(prize?.prize_kind && prize.prize_details?.trim() && prize.delivery_notes?.trim())},
+    {id:'organizer', label:'Datos del organizador', detail:'Nombre, autoridad y número de autorización', done:Boolean(dossier?.organizer_name?.trim().length>=3 && dossier.competent_authority?.trim().length>=3 && dossier.authorization_reference_claimed?.trim())},
     {id:'evidence', label:'Soportes documentales', detail:'Se adjuntó un soporte privado de autorización declarada', done:docs.some(x=>x.document_kind==='authorization_claim')},
     {id:'date', label:'Fecha prevista', detail:'Sorteo o evento previsto registrado', done:Boolean(raffle?.draw_at && !Number.isNaN(Date.parse(raffle.draw_at)))},
     {id:'legal', label:'Verificación externa', detail:'Comprobación de la autorización para esta rifa', done:Boolean(raffle?.authorization_verified)}
   ];
   // Cumplir documentación NO acredita autorización. No permitir inferencia de publicación.
   return {items, completed:items.filter(x=>x.done).length, total:items.length,
-    internalReady:items.slice(0,6).every(x=>x.done), legallyEnabled:items[6].done};
+    internalReady:items.slice(0,-1).every(x=>x.done), legallyEnabled:items.at(-1).done};
 }

@@ -45,5 +45,5 @@ test('V16: accesos siguientes utilizan id real del registro guardado',()=>{
 test('V16: panel responsive, sin habilitación comercial',()=>{
   assert.match(css,/V16 EXPRESS/);
   assert.match(css,/@media\(max-width:620px\)/);
-  assert.match(html,/Ningún paso habilita ventas automáticamente/);
+  assert.match(html,/La numeración y el precio son de preparación\./);
 });

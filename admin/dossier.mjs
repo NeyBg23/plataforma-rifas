@@ -1,4 +1,4 @@
-import { BUCKET, DOCUMENT_KINDS, REVIEW_TYPES, dossierChecklist, dossierEditable, documentPath, isUUID, safeDocumentName } from './dossier-domain.mjs?v=20.0.0';
+import { BUCKET, DOCUMENT_KINDS, REVIEW_TYPES, dossierChecklist, dossierEditable, documentPath, isUUID, safeDocumentName } from './dossier-domain.mjs?v=20.1.0';
 import { paymentRequest } from '../pagos/api.mjs';
 
 // Las escrituras del expediente usan RLS. La publicación se comprueba en el servidor.
@@ -6,19 +6,17 @@ const $ = id => document.getElementById(id);
 const cfg = window.ETS_PUBLIC_SUPABASE || {};
 const qs = new URLSearchParams(location.search);
 const raffleId = qs.get('rifa');
-const state = { client:null, user:null, staff:null, raffle:null, dossier:null, prize:null, photos:[], docs:[], reviews:[], busy:false };
+const state = { client:null, user:null, staff:null, raffle:null, dossier:null, prize:null, docs:[], reviews:[], busy:false };
 const date = val => val ? new Intl.DateTimeFormat('es-CO',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Bogota'}).format(new Date(val)) : 'Sin fecha';
 const statusLabels = {draft:'Borrador',in_review:'En revisión',awaiting_authorization:'Pendiente de autorización',listed:'Publicada',published:'Abierta',closed:'Cerrada',cancelled:'Cancelada'};
 const publicationMessages = {
-  prize_kind:'Selecciona el tipo de premio en «Premio y fotos».',
-  cash_prize:'Las rifas con premio en efectivo quedan fuera de la publicación.',
-  used_prize:'Para publicar la rifa, el premio en especie debe ser nuevo.',
-  prize_details:'Completa la descripción y la entrega en «Premio y fotos».',
+  prize_kind:'Selecciona el tipo de premio.',
+  cash_prize:'El premio en efectivo solo se puede guardar como borrador.',
+  used_prize:'La publicación requiere un premio en especie nuevo.',
+  prize_details:'Describe el premio y cómo se entrega.',
   draw_date:'Registra una fecha de sorteo futura.',
-  photos:'Añade al menos una fotografía del premio.',
   dossier:'Completa el organizador, la autoridad y el número del acto.',
   evidence:'Adjunta el documento oficial de autorización de esta rifa.',
-  review:'Envía la rifa a revisión desde «Mis sorteos».',
   verification:'Está pendiente la verificación de la autorización.',
   ready:'La autorización está verificada. Puedes publicar la ficha.',
   listed:'La ficha ya está en el catálogo.',
@@ -26,6 +24,18 @@ const publicationMessages = {
   inactive:'La rifa ya está cerrada.',
   not_found:'No encontramos esta rifa.'
 };
+function publicationNextStep(status) {
+  const id = encodeURIComponent(raffleId);
+  if (['prize_kind','prize_details','used_prize'].includes(status)) {
+    return { label:'Completar premio ↗', href:'./?premio='+id };
+  }
+  if (status === 'draw_date' && state.raffle.state === 'draft') {
+    return { label:'Editar fecha ↗', href:'./?editar='+id };
+  }
+  if (status === 'dossier') return { label:'Completar autorización ↓', href:'#datos' };
+  if (status === 'evidence') return { label:'Adjuntar soporte ↓', href:'#documentos' };
+  return null;
+}
 let publicationStatus = '';
 let toastHandle;
 function showMessage(text,error=false) {
@@ -45,9 +55,10 @@ function safeField(value,max){return String(value??'').trim().slice(0,max);}
 function setForm(){const f=$('dossierForm');for(const k of ['organizer_name','competent_authority','authorization_reference_claimed','supporting_notes'])f.elements[k].value=state.dossier?.[k]??'';
   $('dossierUpdated').textContent=state.dossier?.updated_at?'Guardado: '+date(state.dossier.updated_at):'Aún no se ha guardado la ficha documental.';
 }
-function renderChecklist(){const result=dossierChecklist({raffle:state.raffle,dossier:state.dossier,prize:state.prize,photoCount:state.photos.length,documents:state.docs});
+function renderChecklist(){const result=dossierChecklist({raffle:state.raffle,dossier:state.dossier,prize:state.prize,documents:state.docs});
   $('doneCount').textContent=`${result.completed} / ${result.total}`;
   $('progressFill').style.width=`${result.completed/result.total*100}%`;
+  $('progressTrack').setAttribute('aria-valuemax',String(result.total));
   $('progressTrack').setAttribute('aria-valuenow',String(result.completed));
   const root=$('checklist');root.replaceChildren();
   for(const item of result.items){const card=element('article','check'+(item.done?' done':''));const mark=element('div','mark',item.done?'✓':'◇');const text=element('div');text.append(element('strong','',item.label),element('small','',item.detail));card.append(mark,text);root.append(card);}
@@ -72,9 +83,19 @@ function showPublication(status, message) {
     ? 'La autorización está verificada. Un administrador puede publicar la ficha.'
     : publicationMessages[status]) || 'No pudimos consultar el estado de publicación.';
   $('publishRaffle').disabled = !canPublish;
-  $('publishRaffle').hidden = visible;
+  $('publishRaffle').hidden = !canPublish;
   $('publicationLink').hidden = !visible;
   $('publicationRetry').hidden = status !== 'error';
+  const next = editing() ? publicationNextStep(status) : null;
+  const nextLink = $('publicationNext');
+  nextLink.hidden = !next;
+  if (next) {
+    nextLink.href = next.href;
+    nextLink.textContent = next.label;
+  }
+  const displayState = status === 'ready' ? 'Lista para publicar' : statusLabels[state.raffle.state] || state.raffle.state;
+  $('raffleState').textContent = displayState;
+  $('sideState').textContent = displayState;
 }
 function publicationRequest(action) {
   return paymentRequest({action,raffle_id:raffleId},state.client);
@@ -109,19 +130,18 @@ $('publishRaffle').addEventListener('click',async () => {
   }
 });
 async function readData(){const db=state.client;
-  const [raffle,dossier,prize,photos,docs,reviews]=await Promise.all([
+  const [raffle,dossier,prize,docs,reviews]=await Promise.all([
     db.from('ets_raffles').select('id,title,state,authorization_verified,draw_at,ticket_price_cop,total_numbers').eq('id',raffleId).maybeSingle(),
     db.from('ets_campaign_dossiers').select('raffle_id,organizer_name,competent_authority,authorization_reference_claimed,supporting_notes,updated_at').eq('raffle_id',raffleId).maybeSingle(),
-    db.from('ets_prizes').select('prize_details,delivery_notes').eq('raffle_id',raffleId).maybeSingle(),
-    db.from('ets_prize_images').select('id').eq('raffle_id',raffleId).limit(8),
+    db.from('ets_prizes').select('prize_kind,prize_details,delivery_notes').eq('raffle_id',raffleId).maybeSingle(),
     db.from('ets_campaign_documents').select('id,storage_path,original_filename,document_kind,size_bytes,created_at').eq('raffle_id',raffleId).order('created_at',{ascending:false}).limit(100),
     db.from('ets_campaign_review_notes').select('id,note_type,content,actor_id,created_at').eq('raffle_id',raffleId).order('created_at',{ascending:false}).limit(100)
   ]);
-  const error=[raffle,dossier,prize,photos,docs,reviews].find(x=>x.error)?.error;
+  const error=[raffle,dossier,prize,docs,reviews].find(x=>x.error)?.error;
   if(error)throw error;
   if(!raffle.data)throw new Error('No se encontró la campaña o tu sesión no tiene permiso para consultarla.');
   state.raffle=raffle.data;state.dossier=dossier.data;state.prize=prize.data;
-  state.photos=photos.data||[];state.docs=docs.data||[];state.reviews=reviews.data||[];
+  state.docs=docs.data||[];state.reviews=reviews.data||[];
   render();
   await readPublication();
 }
@@ -135,6 +155,7 @@ async function init(){if(!isUUID(raffleId)){block('Abre un expediente desde el l
     const {data,error}=await state.client.from('ets_staff_members').select('role,enabled').eq('user_id',state.user.id).maybeSingle();
     if(error||!data?.enabled||!['admin','operator','auditor'].includes(data.role)){block('Tu cuenta no tiene un rol de personal habilitado para consultar el expediente.');return;}
     state.staff=data;await readData();
+    if (location.hash === '#publicacion') $('publicacion').scrollIntoView({block:'start'});
   }catch(e){console.warn('V15 expediente:',e?.message);block('No se pudo verificar el expediente. Revisa la sesión y los permisos de Supabase.');}
 }
 $('dossierForm').addEventListener('submit',async event=>{event.preventDefault();if(!editing()||state.busy)return;

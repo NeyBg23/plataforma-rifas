@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="dossier.css?v=15.0.0"/>
   <script src="config.js?v=15.0.0"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-  <script type="module" src="dossier.mjs?v=20.0.0"></script>
+  <script type="module" src="dossier.mjs?v=20.1.0"></script>
 </head>
 <body data-theme="dark">
   <header class="topbar">
@@ -46,13 +46,14 @@
         <div id="publicationStatus" class="warning" role="status" aria-live="polite">Consultando el estado de publicación…</div>
         <div class="form-foot">
           <a id="publicationLink" class="glow-link" href="../#campanas" hidden>Ver catálogo ↗</a>
+          <a id="publicationNext" class="neon-action" href="#" hidden></a>
           <button type="button" id="publicationRetry" class="link-button" hidden>Consultar de nuevo</button>
-          <button type="button" id="publishRaffle" class="neon-action" disabled>Publicar ficha ↗</button>
+          <button type="button" id="publishRaffle" class="neon-action" disabled hidden>Publicar ficha ↗</button>
         </div>
       </section>
       <section class="section" aria-labelledby="checklistTitle">
-        <div class="section-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2 id="checklistTitle">Preparación del expediente</h2><p>Indicadores de completitud documental. No representan certificación ni aprobación legal.</p></div><div class="progress-summary"><strong id="doneCount">0 / 7</strong><span>Controles documentales</span></div></div>
-        <div class="progress-track" role="progressbar" aria-label="Completitud interna" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0" id="progressTrack"><span id="progressFill"></span></div>
+        <div class="section-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2 id="checklistTitle">Preparación del expediente</h2><p>Consulta los datos guardados y el estado de la autorización.</p></div><div class="progress-summary"><strong id="doneCount">0 / 6</strong><span>Controles documentales</span></div></div>
+        <div class="progress-track" role="progressbar" aria-label="Completitud interna" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" id="progressTrack"><span id="progressFill"></span></div>
         <div class="checklist" id="checklist"></div>
       </section>
       <section class="section surface" id="datos">
@@ -62,7 +63,7 @@
             <label>Organizador o gestor <span class="hint">Declarado</span><input name="organizer_name" maxlength="200" placeholder="Nombre del organizador" autocomplete="off" required/></label>
             <label>Autoridad competente <span class="hint">Declarada</span><input name="competent_authority" maxlength="200" placeholder="Entidad que debe autorizar" autocomplete="off" required/></label>
           </div>
-          <label>Referencia del acto de autorización <span class="hint">No verificada</span><input name="authorization_reference_claimed" maxlength="160" placeholder="Número o código, si existe" autocomplete="off"/></label>
+          <label>Número de la autorización <span class="hint">Declarado</span><input name="authorization_reference_claimed" maxlength="160" placeholder="Número o código del acto" autocomplete="off"/></label>
           <label>Observaciones sobre el expediente <textarea name="supporting_notes" maxlength="4000" rows="4" placeholder="Información adicional o asuntos pendientes de validar"></textarea></label>
           <div class="form-foot"><span id="dossierUpdated">Aún no se ha guardado la ficha documental.</span><button class="neon-action" type="submit" id="saveDossier">Guardar información <span>↗</span></button></div>
         </form>

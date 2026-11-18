@@ -74,7 +74,17 @@
     $('accountEmail').textContent=user.email||'Usuario';
     $('accountRole').textContent=roleLabels[result.data.role]||result.data.role;
     document.querySelectorAll('.write-only').forEach(element=>element.hidden=!canWrite());
-    visible('dashboardView');await loadData();showPanel('overview');
+    visible('dashboardView');await loadData();
+    const route = new URLSearchParams(location.search);
+    const prizeId = route.get('premio');
+    const editId = route.get('editar');
+    if (prizeId && state.raffles.some(r => r.id === prizeId)) {
+      await openPrize(prizeId);
+    } else if (editId && canWrite() && state.raffles.some(r => r.id === editId && r.state === 'draft' && !r.authorization_verified)) {
+      startEdit(editId);
+    } else {
+      showPanel('overview');
+    }
   }
   async function loadData(){
     if(!state.client||!state.user)return;
@@ -110,15 +120,13 @@
     }
     $('dashboardLeadName').textContent=raffle.title;
     status.textContent=labels[raffle.state]||'En preparación';
-    summary.textContent=raffle.state==='draft'
-      ? 'Continúa preparando el premio y su expediente. Puedes guardar los datos por partes.'
-      : 'Puedes consultar su información y seguimiento. Los cambios requieren el estado correspondiente.';
+    summary.textContent='Abre Publicación para ver el siguiente paso de este sorteo.';
     $('dashboardPrize').dataset.prize=raffle.id;
     $('dashboardDossier').dataset.dossier=raffle.id;
     $('dashboardNumbers').dataset.numbers=raffle.id;
     $('dashboardPreview').dataset.preview=raffle.id;
     $('dashboardPayments').dataset.payments=raffle.id;
-    $('dashboardPrize').textContent=raffle.state==='draft'&&canWrite()?'Añadir fotos / premio ↗':'Consultar premio ↗';
+    $('dashboardPrize').textContent=raffle.state==='draft'&&canWrite()?'Premio y fotos':'Consultar premio';
   }
   function el(tag,attrs={},value){
     const node=document.createElement(tag);
@@ -143,7 +151,7 @@
       const statusCell=el('td');statusCell.append(el('span',{class:'pill'},labels[r.state]||r.state));tr.append(statusCell);
       const actions=el('td');
       actions.append(el('button',{type:'button',class:'mini',dataset:{prize:r.id}},'Premio y fotos'));
-      actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'▤ Expediente y publicación'));
+      actions.append(el('button',{type:'button',class:'mini',dataset:{dossier:r.id}},'Publicación ↗'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{preview:r.id}},'✦ Vista cliente'));
       actions.append(el('button',{type:'button',class:'mini',dataset:{payments:r.id}},'Pagos por QR'));
       if(r.state==='draft')actions.append(el('button',{type:'button',class:'mini',dataset:{lab:r.id}},'Pruebas internas'));
@@ -283,7 +291,7 @@
         banner.querySelector('[data-preview]').dataset.preview=createdId;
         banner.hidden=false;
       }
-      note('Sorteo guardado como borrador. Puedes añadir fotos y completar su expediente cuando quieras. Sin publicación ni ventas.');
+      note('Sorteo guardado. Abre Publicación para continuar.');
     }catch(err){note('No fue posible guardar: '+(err.message||'error desconocido'),true);}
     finally{state.busy=false;$('saveRaffle').disabled=false;}
   }
@@ -347,6 +355,7 @@
     state.selectedRaffle=raffle;state.prize=null;state.photos=[];
     $('prizeRaffleTitle').textContent=raffle.title;
     $('prizeSubtitle').textContent='Ficha de '+raffle.title+'.';
+    $('prizePublication')?.setAttribute('href',publicationUrl(raffleId));
     forms.prize.reset();forms.photo.reset();
     updatePrizeKind();
     $('prizeSaveStatus').textContent='Cargando ficha…';
@@ -399,9 +408,12 @@
       const {error}=await request;
       if(error)throw error;
       await refreshPrize(id);await loadData();
-      note('Ficha guardada en Supabase. Los cambios están en el historial; no está publicada.');
+      note('Premio guardado. Ya puedes consultar la publicación.');
     }catch(e){note('No pudimos guardar la ficha: '+(e.message||'Error desconocido'),true);}
     finally{state.prizeBusy=false;$('savePrize').disabled=false;}
+  }
+  function publicationUrl(raffleId) {
+    return 'expediente.html?rifa='+encodeURIComponent(raffleId)+'#publicacion';
   }
   function updatePrizeKind(){
     const isCash=forms.prize.elements.prize_kind.value==='cash';
@@ -640,7 +652,7 @@
       return;
     }
     if(button.dataset.dossier){
-      if(/^[0-9a-f-]{36}$/i.test(button.dataset.dossier))location.assign('expediente.html?rifa='+encodeURIComponent(button.dataset.dossier));
+      if(/^[0-9a-f-]{36}$/i.test(button.dataset.dossier))location.assign(publicationUrl(button.dataset.dossier));
       return;
     }
     if(button.dataset.prize){void openPrize(button.dataset.prize);return;}
